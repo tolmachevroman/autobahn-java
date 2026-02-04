@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.function.Consumer;
+import java8.util.function.Consumer;
 
 import static io.xconn.cryptology.Util.generateRandomBytesArray;
 

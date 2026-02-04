@@ -23,7 +23,7 @@ import org.web3j.crypto.StructuredDataEncoder;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public class Util {
 

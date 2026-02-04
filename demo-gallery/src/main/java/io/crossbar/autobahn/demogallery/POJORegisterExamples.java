@@ -2,7 +2,7 @@ package io.crossbar.autobahn.demogallery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 import io.crossbar.autobahn.demogallery.data.Person;
 import io.crossbar.autobahn.wamp.Client;

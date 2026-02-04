@@ -12,10 +12,10 @@ list:
 
 clean:
 	sudo rm -rf ./.gradle/ ./build ./autobahn/build ./demo-gallery/build/
-	./removeall.sh
+	-docker rmi -f $$(docker images -q crossbario/autobahn-java:* | uniq)
 
 generate_changelog:
-	./changelog_gen.sh
+	@echo "Generate changelog manually or use: git log --pretty=format:'- %s' --no-merges"
 
 build: build_toolchain build_android build_netty
 

@@ -17,7 +17,7 @@ import io.crossbar.autobahn.wamp.Session;
 import io.crossbar.autobahn.wamp.types.ExitInfo;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public class ReflectionPOJOCallSample {
 

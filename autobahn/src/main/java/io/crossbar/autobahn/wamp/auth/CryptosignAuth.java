@@ -3,7 +3,7 @@ package io.crossbar.autobahn.wamp.auth;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 import org.bouncycastle.util.encoders.Hex;
 

@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.web3j.crypto.ECKeyPair;
 
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public class MarketMemberLogin {
     private static JSONObject createMarketMemberLogin(String member, String pubkey)
