@@ -45,6 +45,13 @@ dependencies {
         implementation 'io.netty:netty-handler:4.1.106.Final'
     }
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.assertj:assertj-core:3.25.1'
+    
+    // For integration tests
+    testImplementation 'org.testcontainers:testcontainers:1.19.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+    testImplementation 'org.awaitility:awaitility:4.2.0'
 }
 
 // Create the pom configuration:
