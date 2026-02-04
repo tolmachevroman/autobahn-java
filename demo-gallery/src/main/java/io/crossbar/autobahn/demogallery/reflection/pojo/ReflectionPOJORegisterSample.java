@@ -19,7 +19,7 @@ import io.crossbar.autobahn.wamp.types.Registration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public class ReflectionPOJORegisterSample {
     public static CompletableFuture<ExitInfo> registerReflectionPOJO(String wsAddress, String realm) {

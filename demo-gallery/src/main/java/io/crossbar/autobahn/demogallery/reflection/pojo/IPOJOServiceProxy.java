@@ -15,7 +15,7 @@ import io.crossbar.autobahn.demogallery.data.Person;
 import io.crossbar.autobahn.wamp.reflectionRoles.WampProcedure;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public interface IPOJOServiceProxy {
     @WampProcedure("io.crossbar.example.get_person")

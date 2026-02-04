@@ -13,7 +13,7 @@ package io.crossbar.autobahn.demogallery.reflection.hello;
 
 import io.crossbar.autobahn.wamp.reflectionRoles.WampProcedure;
 
-import java.util.concurrent.CompletableFuture;
+import java8.util.concurrent.CompletableFuture;
 
 public interface IAdd2ServiceProxy {
     @WampProcedure("com.example.add2")

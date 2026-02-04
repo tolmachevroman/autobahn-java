@@ -28,6 +28,8 @@ dependencies {
         exclude group: "org.bouncycastle", module: "bcprov-jdk18on"
     }
     if (IS_ANDROID) {
+        // Backport Java 8 APIs for older Android versions
+        api 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
         implementation 'org.web3j:core:4.8.8-android'
         implementation 'org.web3j:abi:4.8.8-android'
         implementation 'org.web3j:utils:4.8.8-android'
@@ -71,7 +73,7 @@ if (IS_ANDROID) {
         namespace "io.crossbar.autobahn"
         defaultConfig {
             compileSdk 34
-            minSdkVersion 26
+            minSdkVersion 23
             targetSdkVersion 34
         }
         buildTypes {
