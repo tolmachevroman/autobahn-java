@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-MAINTAINER The Crossbar.io Project <support@crossbario.com>
+LABEL maintainer="The Crossbar.io Project <support@crossbario.com>"
 
 # Metadata
 ARG BUILD_DATE
@@ -20,15 +20,17 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 USER root
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV GRADLE_VERSION 6.4.1
+ENV DEBIAN_FRONTEND=noninteractive
+ENV GRADLE_VERSION=8.2
 
 WORKDIR /workspace
 
 RUN    apt update \
-    && apt install unzip wget openjdk-11-jdk-headless -y \
+    && apt install -y --no-install-recommends unzip wget openjdk-17-jdk-headless \
+        || (sleep 5 && apt update && apt install -y --no-install-recommends unzip wget openjdk-17-jdk-headless) \
+        || (sleep 10 && apt update && apt install -y --no-install-recommends unzip wget openjdk-17-jdk-headless) \
     && apt clean \
-    && rm -rf /var/lib/apt/lists/
+    && rm -rf /var/lib/apt/lists/*
 
 RUN    wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip \
     && mkdir /opt/gradle \
@@ -37,11 +39,6 @@ RUN    wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-b
 
 ENV PATH=$PATH:/opt/gradle/gradle-${GRADLE_VERSION}/bin
 
-COPY ${PWD} /workspace
+WORKDIR /workspace
 
-RUN gradle installDist -PbuildPlatform=netty -PbuildVersion=${AUTOBAHN_JAVA_VERSION}
-
-RUN mkdir -p /autobahn; cp /workspace/demo-gallery/build/install/demo-gallery/lib/* /autobahn; \
-    rm /autobahn/demo-gallery*.jar
-
-CMD ["gradle", "installDist", "-PbuildPlatform=netty"]
+CMD ["/bin/bash"]
