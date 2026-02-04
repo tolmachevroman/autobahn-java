@@ -38,10 +38,13 @@ jobs:
             autobahn/build/reports/tests/
             autobahn/build/test-results/
 
+      - name: Build Docker image for integration tests
+        run: docker build -t autobahn-java:netty -f docker/Dockerfile.netty --build-arg AUTOBAHN_JAVA_VERSION=test .
+
       - name: Setup Crossbar (for integration tests)
         run: |
           docker run -d -p 8080:8080 --name crossbar crossbario/crossbar
           docker run -d --link crossbar -v ${PWD}/demo-gallery/python:/test crossbario/autobahn-python python -u /test/test_component2.py
 
       - name: Run integration tests
-        run: docker run --rm -i --link crossbar -v ${PWD}:/workspace crossbario/autobahn-java:netty /bin/bash -c "gradle installDist -PbuildPlatform=netty && /workspace/demo-gallery/build/install/demo-gallery/bin/demo-gallery ws://crossbar:8080/ws"
+        run: docker run --rm -i --link crossbar -v ${PWD}:/workspace autobahn-java:netty /bin/bash -c "gradle installDist -PbuildPlatform=netty && /workspace/demo-gallery/build/install/demo-gallery/bin/demo-gallery ws://crossbar:8080/ws"
