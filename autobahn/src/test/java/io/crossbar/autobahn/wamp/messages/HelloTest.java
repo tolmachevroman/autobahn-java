@@ -2,6 +2,7 @@ package io.crossbar.autobahn.wamp.messages;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,36 +15,51 @@ public class HelloTest {
     @Test
     public void testHelloMessageCreation() {
         String realm = "realm1";
-        Map<String, Object> details = new HashMap<>();
-        details.put("roles", new HashMap<String, Object>() {{
-            put("publisher", new HashMap<>());
-            put("subscriber", new HashMap<>());
-            put("caller", new HashMap<>());
-            put("callee", new HashMap<>());
-        }});
+        Map<String, Map> roles = new HashMap<>();
+        roles.put("publisher", new HashMap<>());
+        roles.put("subscriber", new HashMap<>());
+        roles.put("caller", new HashMap<>());
+        roles.put("callee", new HashMap<>());
 
-        Hello hello = new Hello(realm, details);
+        Hello hello = new Hello(realm, roles);
 
         assertNotNull(hello);
         assertEquals(realm, hello.realm);
-        assertEquals(details, hello.details);
-    }
-
-    @Test
-    public void testHelloMessageType() {
-        Hello hello = new Hello("realm1", new HashMap<>());
+        assertEquals(roles, hello.roles);
         assertEquals(Hello.MESSAGE_TYPE, hello.getMessageType());
     }
 
     @Test
+    public void testHelloMessageType() {
+        Map<String, Map> roles = new HashMap<>();
+        Hello hello = new Hello("realm1", roles);
+        assertEquals(Hello.MESSAGE_TYPE, hello.getMessageType());
+        assertEquals(1, Hello.MESSAGE_TYPE);
+    }
+
+    @Test
     public void testHelloWithAuthId() {
-        Map<String, Object> details = new HashMap<>();
-        details.put("authid", "user123");
-        details.put("authmethods", new String[]{"ticket", "cryptosign"});
+        Map<String, Map> roles = new HashMap<>();
+        roles.put("publisher", new HashMap<>());
+        
+        Hello hello = new Hello("realm1", roles, Arrays.asList("ticket", "cryptosign"), 
+                "user123", "backend", null);
 
-        Hello hello = new Hello("realm1", details);
+        assertThat(hello.authID).isEqualTo("user123");
+        assertThat(hello.authMethods).containsExactly("ticket", "cryptosign");
+        assertThat(hello.authRole).isEqualTo("backend");
+    }
 
-        assertThat(details).containsEntry("authid", "user123");
-        assertThat(details).containsKey("authmethods");
+    @Test
+    public void testHelloWithAuthextra() {
+        Map<String, Map> roles = new HashMap<>();
+        Map<String, Object> authextra = new HashMap<>();
+        authextra.put("key1", "value1");
+        authextra.put("key2", 42);
+
+        Hello hello = new Hello("realm1", roles, null, null, null, authextra);
+
+        assertThat(hello.authextra).containsEntry("key1", "value1");
+        assertThat(hello.authextra).containsEntry("key2", 42);
     }
 }
