@@ -1,92 +1,61 @@
-def IS_ANDROID = project.hasProperty('IS_ANDROID') ? project.IS_ANDROID: true
-def IS_NEXT = project.hasProperty('IS_NEXT') ? project.IS_NEXT: false
-def IS_NETTY = project.hasProperty('IS_NETTY') ? project.IS_NETTY: false
-def ARTIFACT_ANDROID = (project.hasProperty('BUILD_LEGACY') && project.BUILD_LEGACY) ? 'autobahn-android-legacy': 'autobahn-android'
+def IS_ANDROID = project.hasProperty('IS_ANDROID') ? project.IS_ANDROID : true
+def IS_NETTY = project.hasProperty('IS_NETTY') ? project.IS_NETTY : false
 
-apply plugin: IS_ANDROID ? 'com.android.library': 'java-library'
+apply plugin: IS_ANDROID ? 'com.android.library' : 'java-library'
 apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
-def ARTIFACT_JAVA = 'autobahn-java'
-def ARTIFACT_NEXT = 'autobahn'
 
 def groupID = 'io.crossbar.autobahn'
 def licenseName = 'MIT'
 def licenseUrl = 'https://opensource.org/licenses/MIT'
-def relVersion = System.getenv().containsKey('AUTOBAHN_BUILD_VERSION') ? System.getenv(
-        'AUTOBAHN_BUILD_VERSION'): '21.4.1'
+def relVersion = System.getenv().containsKey('AUTOBAHN_BUILD_VERSION') ? 
+        System.getenv('AUTOBAHN_BUILD_VERSION') : '21.4.2-SNAPSHOT'
 def siteUrl = 'https://github.com/crossbario/autobahn-java'
-def SONATYPE_USER = System.getenv().containsKey('SONATYPE_USER') ? System.getenv('SONATYPE_USER'): ''
-def SONATYPE_PASS = System.getenv().containsKey('SONATYPE_PASS') ? System.getenv('SONATYPE_PASS'): ''
 
 dependencies {
-    api 'com.fasterxml.jackson.core:jackson-core:2.16.1'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.16.1'
-    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.8'
-    implementation('io.xconn:cryptology:1.0.1') {
-        exclude group: "org.bouncycastle", module: "bcprov-jdk18on"
-    }
+    api 'com.fasterxml.jackson.core:jackson-core:2.21.0'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0'
+    implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.11'
+    
+    // Cryptography dependencies for WAMP authentication
+    implementation 'io.xconn:cryptology:1.1.2'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
+    
     // Backport Java 8 APIs for Android API 23 compatibility
     api 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
-    if (IS_ANDROID) {
-        implementation 'org.web3j:core:4.8.8-android'
-        implementation 'org.web3j:abi:4.8.8-android'
-        implementation 'org.web3j:utils:4.8.8-android'
-    } else{
-        implementation 'org.web3j:core:4.11.0'
-        implementation 'org.web3j:abi:4.11.0'
-        implementation 'org.web3j:utils:4.11.0'
-        implementation 'org.json:json:20240205'
-        implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5'
+    
+    if (!IS_ANDROID) {
+        implementation 'org.json:json:20240303'
+        implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     }
+    
     if (IS_NETTY) {
-        implementation 'io.netty:netty-codec-http:4.1.106.Final'
-        implementation 'io.netty:netty-handler:4.1.106.Final'
+        implementation 'io.netty:netty-codec-http:4.1.115.Final'
+        implementation 'io.netty:netty-handler:4.1.115.Final'
     }
+    
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.mockito:mockito-core:5.10.0'
-    testImplementation 'org.assertj:assertj-core:3.25.1'
+    testImplementation 'org.mockito:mockito-core:5.21.0'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
     
     // For integration tests
-    testImplementation 'org.testcontainers:testcontainers:1.19.3'
-    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
-    testImplementation 'org.awaitility:awaitility:4.2.0'
-}
-
-// Create the pom configuration:
-def pomConfig = {
-    // Set your license
-    licenses {
-        license {
-            name licenseName
-            url licenseUrl
-        }
-    }
-    developers {
-        developer {
-            id "crossbario"
-            name "Crossbar.io"
-            email "support@crossbario.com"
-        }
-    }
-    scm {
-        url siteUrl
-    }
+    testImplementation 'org.testcontainers:testcontainers:2.0.3'
+    testImplementation 'org.testcontainers:junit-jupiter:1.21.4'
+    testImplementation 'org.awaitility:awaitility:4.3.0'
 }
 
 if (IS_ANDROID) {
     android {
-        namespace "io.crossbar.autobahn"
+        namespace = "io.crossbar.autobahn"
         defaultConfig {
-            compileSdk 34
+            compileSdkVersion 35
             minSdkVersion 23
-            targetSdkVersion 34
+            targetSdkVersion 36
         }
         buildTypes {
             release {
                 minifyEnabled false
-                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
             }
         }
         sourceSets {
@@ -101,93 +70,80 @@ if (IS_ANDROID) {
             sourceCompatibility JavaVersion.VERSION_1_8
             targetCompatibility JavaVersion.VERSION_1_8
         }
-        lintOptions {
-            abortOnError false
+        lint {
+            abortOnError = false
         }
-        packagingOptions {
-            exclude 'META-INF/spring.tooling'
-            exclude 'META-INF/spring.handlers'
-            exclude 'META-INF/spring.schemas'
-            exclude 'META-INF/license.txt'
-            exclude 'META-INF/notice.txt'
+        packaging {
+            resources {
+                excludes += [
+                    'META-INF/spring.tooling',
+                    'META-INF/spring.handlers',
+                    'META-INF/spring.schemas',
+                    'META-INF/license.txt',
+                    'META-INF/notice.txt'
+                ]
+            }
         }
     }
 
-    task sourcesJar(type: Jar) {
+    // Use tasks.register for lazy configuration
+    tasks.register('sourcesJar', Jar) {
         archiveClassifier.set("sources")
         from android.sourceSets.main.java.srcDirs
     }
 
-    task javadoc(type: Javadoc) {
-        failOnError false
+    // Simplified javadoc task for Android - AGP 9.0+ removed variant APIs
+    tasks.register('javadoc', Javadoc) {
+        failOnError = false
         source = android.sourceSets.main.java.sourceFiles
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-        classpath += configurations.implementation
+        
+        options {
+            encoding = 'UTF-8'
+            charSet = 'UTF-8'
+            noTimestamp = true
+        }
+        
+        // Stub task - full javadoc for Android requires complex AGP 9.0+ setup
+        enabled = false
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
+    tasks.register('javadocJar', Jar) {
         archiveClassifier.set("javadoc")
         from javadoc.destinationDir
     }
 
-    project.archivesBaseName = ARTIFACT_ANDROID
+    base.archivesName = 'autobahn-android'
     group = groupID
     version = relVersion
-
-    afterEvaluate {
-        javadoc.classpath += files(android.libraryVariants.collect { variant ->
-            variant.javaCompileProvider.get().classpath.files
-        })
-    }
-
-    publishing {
-        repositories {
-            maven {
-                name 'central'
-                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-                credentials {
-                    username SONATYPE_USER
-                    password SONATYPE_PASS
-                }
-            }
-        }
-    }
 } else {
-    task sourcesJar(type: Jar, dependsOn: classes) {
+    // Netty/Java builds
+    tasks.register('sourcesJar', Jar) {
+        dependsOn classes
         archiveClassifier.set("sources")
         from sourceSets.main.allSource
     }
-    task javadocJar(type: Jar, dependsOn: javadoc) {
+    
+    tasks.register('javadocJar', Jar) {
+        dependsOn javadoc
         archiveClassifier.set("javadoc")
         from javadoc.destinationDir
     }
 
-    if (IS_NEXT) {
-        sourceSets {
-            main {
-                java {
-                    exclude 'io/crossbar/autobahn/wamp/transports/AndroidWebSocket.java'
-                    exclude 'io/crossbar/autobahn/wamp/transports/Netty*'
-                    exclude 'io/crossbar/autobahn/websocket/utils/AndroidThreadMessenger.java'
-                    exclude 'io/crossbar/autobahn/utils/ABALogger.java'
-                }
-            }
-        }
-    } else {
-        sourceSets {
-            main {
-                java {
-                    exclude 'io/crossbar/autobahn/wamp/transports/AndroidWebSocket.java'
-                    exclude 'io/crossbar/autobahn/wamp/transports/WebSocket.java'
-                    exclude 'io/crossbar/autobahn/websocket'
-                    exclude 'io/crossbar/autobahn/utils/ABALogger.java'
-                }
+    sourceSets {
+        main {
+            java {
+                exclude 'io/crossbar/autobahn/wamp/transports/AndroidWebSocket.java'
+                exclude 'io/crossbar/autobahn/wamp/transports/WebSocket.java'
+                exclude 'io/crossbar/autobahn/websocket'
+                exclude 'io/crossbar/autobahn/utils/ABALogger.java'
             }
         }
     }
+    
     jar {
         version = relVersion
     }
+    
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
@@ -198,39 +154,45 @@ afterEvaluate {
             release(MavenPublication) {
                 if (IS_ANDROID) {
                     from components.findByName('release')
-                    artifactId ARTIFACT_ANDROID
+                    artifactId = 'autobahn-android'
                 } else {
                     from components.java
-                    artifactId IS_NEXT ? ARTIFACT_NEXT : ARTIFACT_JAVA
+                    artifactId = 'autobahn-java'
                 }
 
                 artifact sourcesJar
                 artifact javadocJar
 
-                groupId groupID
-                version relVersion
-                pom.withXml {
-                    def root = asNode()
-                    root.appendNode('description', 'WebSocket & WAMP for Java8+')
-                    root.appendNode('name', 'Autobahn Java')
-                    root.appendNode('url', siteUrl)
-                    root.children().last() + pomConfig
+                groupId = groupID
+                version = relVersion
+                
+                pom {
+                    name = 'Autobahn Java'
+                    description = 'WebSocket & WAMP for Java8+ and Android API 23+'
+                    url = siteUrl
+                    licenses {
+                        license {
+                            name = licenseName
+                            url = licenseUrl
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = "crossbario"
+                            name = "Crossbar.io"
+                            email = "support@crossbario.com"
+                        }
+                    }
+                    scm {
+                        url = siteUrl
+                    }
                 }
             }
         }
+        
         repositories {
-            maven {
-                name 'central'
-                url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-                credentials {
-                    username SONATYPE_USER
-                    password SONATYPE_PASS
-                }
-            }
-        }
-        signing {
-            required true
-            sign publishing.publications.release
+            // Publish to local Maven repository
+            mavenLocal()
         }
     }
 }

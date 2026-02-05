@@ -1,19 +1,18 @@
-apply plugin: project.IS_ANDROID ? project.PLUGIN_ANDROID_APP: project.PLUGIN_JAVA_APP
+apply plugin: project.IS_ANDROID ? 'com.android.application' : 'application'
 
-if (plugins.hasPlugin(project.PLUGIN_ANDROID_APP)) {
+if (project.IS_ANDROID) {
     android {
-
         defaultConfig {
-            namespace "io.crossbar.autobahn.demogallery"
-            compileSdk 34
+            namespace = "io.crossbar.autobahn.demogallery"
+            compileSdkVersion 35
             minSdkVersion 23
-            targetSdkVersion 34
+            targetSdkVersion 36
             multiDexEnabled true
         }
         buildTypes {
             release {
                 minifyEnabled false
-                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             }
         }
         compileOptions {
@@ -29,43 +28,39 @@ if (plugins.hasPlugin(project.PLUGIN_ANDROID_APP)) {
                 }
             }
         }
-        packagingOptions {
-            exclude 'META-INF/spring.tooling'
-            exclude 'META-INF/spring.handlers'
-            exclude 'META-INF/spring.schemas'
-            exclude 'META-INF/license.txt'
-            exclude 'META-INF/notice.txt'
-            exclude 'META-INF/INDEX.list'
-        }
-    }
-
-    dependencies {
-        implementation project(path: ':autobahn')
-        implementation 'androidx.appcompat:appcompat:1.6.1'
-        implementation 'com.android.support:multidex:1.0.3'
-        implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-        implementation "com.google.android.material:material:1.11.0"
-
-        implementation 'com.basgeekball:awesome-validation:4.2'
-        implementation 'org.web3j:crypto:4.8.8-android'
-        implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
-    }
-} else if (project.IS_NEXT) {
-    // Nothing useful is produced here, however this avoids
-    // build failure, until we come with a better solution.
-    mainClassName = 'dummy'
-    sourceSets {
-        main {
-            java {
-                exclude 'io/crossbar/autobahn/demogallery'
+        packaging {
+            resources {
+                excludes += [
+                    'META-INF/spring.tooling',
+                    'META-INF/spring.handlers',
+                    'META-INF/spring.schemas',
+                    'META-INF/license.txt',
+                    'META-INF/notice.txt',
+                    'META-INF/INDEX.list'
+                ]
             }
         }
     }
+
+    dependencies {
+        implementation project(path: ':autobahn')
+        implementation 'androidx.appcompat:appcompat:1.7.1'
+        implementation 'com.android.support:multidex:1.0.3'
+        implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+        implementation 'com.google.android.material:material:1.13.0'
+        implementation 'com.basgeekball:awesome-validation:4.3'
+        implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+    }
 } else {
-    mainClassName = 'io.crossbar.autobahn.demogallery.netty.Main'
+    // Netty build
+    application {
+        mainClass = 'io.crossbar.autobahn.demogallery.netty.Main'
+    }
+    
     dependencies {
         implementation project(path: ':autobahn')
     }
+    
     sourceSets {
         main {
             java {
@@ -76,6 +71,7 @@ if (plugins.hasPlugin(project.PLUGIN_ANDROID_APP)) {
             }
         }
     }
+    
     jar {
         version = project.properties.get("buildVersion", "")
     }
