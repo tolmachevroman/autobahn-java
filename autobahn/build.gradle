@@ -95,7 +95,6 @@ if (IS_ANDROID) {
     tasks.register('javadoc', Javadoc) {
         failOnError = false
         source = android.sourceSets.main.java.sourceFiles
-        classpath += files(android.bootClasspath)
         
         options {
             encoding = 'UTF-8'
@@ -115,9 +114,11 @@ if (IS_ANDROID) {
     version = relVersion
 
     afterEvaluate {
-        javadoc.classpath += files(android.libraryVariants.collect { variant ->
-            variant.javaCompileProvider.get().classpath.files
-        })
+        // Configure javadoc classpath after evaluation when variant info is available
+        def releaseVariant = android.libraryVariants.find { it.name == 'release' }
+        if (releaseVariant) {
+            javadoc.classpath += files(releaseVariant.javaCompileProvider.get().classpath.files)
+        }
     }
 } else {
     // Netty/Java builds
