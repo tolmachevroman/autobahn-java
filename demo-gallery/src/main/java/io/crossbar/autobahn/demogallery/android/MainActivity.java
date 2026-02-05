@@ -35,10 +35,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(new Intent(getApplicationContext(), TestSuiteClientActivity.class));
         } else if (id == R.id.button_websocket_echo_client) {
             startActivity(new Intent(getApplicationContext(), EchoClientActivity.class));
-        } else if (id == R.id.buttonXBRSeller) {
-            startActivity(new Intent(getApplicationContext(), XbrSellerActivity.class));
-        } else if (id == R.id.buttonXBRBuyer) {
-            startActivity(new Intent(getApplicationContext(), XbrBuyerActivity.class));
         }
     }
 }

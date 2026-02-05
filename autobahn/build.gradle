@@ -23,14 +23,7 @@ dependencies {
     // Backport Java 8 APIs for Android API 23 compatibility
     api 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
     
-    if (IS_ANDROID) {
-        implementation 'org.web3j:core:4.8.8-android'
-        implementation 'org.web3j:abi:4.8.8-android'
-        implementation 'org.web3j:utils:4.8.8-android'
-    } else {
-        implementation 'org.web3j:core:4.12.3'
-        implementation 'org.web3j:abi:4.12.3'
-        implementation 'org.web3j:utils:4.12.3'
+    if (!IS_ANDROID) {
         implementation 'org.json:json:20240303'
         implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
     }
