@@ -16,9 +16,10 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0'
     implementation 'org.msgpack:jackson-dataformat-msgpack:0.9.11'
-    implementation('io.xconn:cryptology:1.1.2') {
-        exclude group: "org.bouncycastle", module: "bcprov-jdk18on"
-    }
+    
+    // Cryptography dependencies for WAMP authentication
+    implementation 'io.xconn:cryptology:1.1.2'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
     
     // Backport Java 8 APIs for Android API 23 compatibility
     api 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
