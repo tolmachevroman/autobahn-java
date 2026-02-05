@@ -130,7 +130,7 @@ if (IS_ANDROID) {
         from javadoc.destinationDir
     }
 
-    project.archivesBaseName = 'autobahn-android'
+    base.archivesName = 'autobahn-android'
     group = groupID
     version = relVersion
 
