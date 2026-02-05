@@ -28,7 +28,5 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        // Alternative repository for Web3j
-        maven { url "https://artifacts.consensys.net/public/maven/maven/" }
     }
 }

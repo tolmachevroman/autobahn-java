@@ -46,7 +46,7 @@ dependencies {
 
 if (IS_ANDROID) {
     android {
-        namespace "io.crossbar.autobahn"
+        namespace = "io.crossbar.autobahn"
         defaultConfig {
             compileSdkVersion 35
             minSdkVersion 23
@@ -71,7 +71,7 @@ if (IS_ANDROID) {
             targetCompatibility JavaVersion.VERSION_1_8
         }
         lint {
-            abortOnError false
+            abortOnError = false
         }
         packaging {
             resources {
@@ -93,7 +93,7 @@ if (IS_ANDROID) {
     }
 
     tasks.register('javadoc', Javadoc) {
-        failOnError false
+        failOnError = false
         source = android.sourceSets.main.java.sourceFiles
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     }
@@ -152,17 +152,17 @@ afterEvaluate {
             release(MavenPublication) {
                 if (IS_ANDROID) {
                     from components.findByName('release')
-                    artifactId 'autobahn-android'
+                    artifactId = 'autobahn-android'
                 } else {
                     from components.java
-                    artifactId 'autobahn-java'
+                    artifactId = 'autobahn-java'
                 }
 
                 artifact sourcesJar
                 artifact javadocJar
 
-                groupId groupID
-                version relVersion
+                groupId = groupID
+                version = relVersion
                 
                 pom {
                     name = 'Autobahn Java'
