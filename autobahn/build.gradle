@@ -95,7 +95,13 @@ if (IS_ANDROID) {
     tasks.register('javadoc', Javadoc) {
         failOnError = false
         source = android.sourceSets.main.java.sourceFiles
-        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        classpath += files(android.bootClasspath)
+        
+        options {
+            encoding = 'UTF-8'
+            charSet = 'UTF-8'
+            links('https://docs.oracle.com/javase/8/docs/api/')
+        }
     }
 
     tasks.register('javadocJar', Jar) {
