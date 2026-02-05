@@ -92,6 +92,7 @@ if (IS_ANDROID) {
         from android.sourceSets.main.java.srcDirs
     }
 
+    // Simplified javadoc task for Android - AGP 9.0+ removed variant APIs
     tasks.register('javadoc', Javadoc) {
         failOnError = false
         source = android.sourceSets.main.java.sourceFiles
@@ -99,12 +100,14 @@ if (IS_ANDROID) {
         options {
             encoding = 'UTF-8'
             charSet = 'UTF-8'
-            links('https://docs.oracle.com/javase/8/docs/api/')
+            noTimestamp = true
         }
+        
+        // Stub task - full javadoc for Android requires complex AGP 9.0+ setup
+        enabled = false
     }
 
     tasks.register('javadocJar', Jar) {
-        dependsOn javadoc
         archiveClassifier.set("javadoc")
         from javadoc.destinationDir
     }
@@ -112,14 +115,6 @@ if (IS_ANDROID) {
     base.archivesName = 'autobahn-android'
     group = groupID
     version = relVersion
-
-    afterEvaluate {
-        // Configure javadoc classpath after evaluation when variant info is available
-        def releaseVariant = android.libraryVariants.find { it.name == 'release' }
-        if (releaseVariant) {
-            javadoc.classpath += files(releaseVariant.javaCompileProvider.get().classpath.files)
-        }
-    }
 } else {
     // Netty/Java builds
     tasks.register('sourcesJar', Jar) {
