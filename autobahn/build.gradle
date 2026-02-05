@@ -54,9 +54,9 @@ if (IS_ANDROID) {
     android {
         namespace "io.crossbar.autobahn"
         defaultConfig {
-            compileSdk 35
+            compileSdkVersion 35
             minSdkVersion 23
-            targetSdkVersion 35
+            targetSdkVersion 36
         }
         buildTypes {
             release {

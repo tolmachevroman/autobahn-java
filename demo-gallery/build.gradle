@@ -4,9 +4,9 @@ if (project.IS_ANDROID) {
     android {
         defaultConfig {
             namespace "io.crossbar.autobahn.demogallery"
-            compileSdk 35
+            compileSdkVersion 35
             minSdkVersion 23
-            targetSdkVersion 35
+            targetSdkVersion 36
             multiDexEnabled true
         }
         buildTypes {
@@ -44,10 +44,10 @@ if (project.IS_ANDROID) {
 
     dependencies {
         implementation project(path: ':autobahn')
-        implementation 'androidx.appcompat:appcompat:1.7.0'
+        implementation 'androidx.appcompat:appcompat:1.7.1'
         implementation 'com.android.support:multidex:1.0.3'
-        implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-        implementation 'com.google.android.material:material:1.12.0'
+        implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+        implementation 'com.google.android.material:material:1.13.0'
         implementation 'com.basgeekball:awesome-validation:4.3'
         implementation 'org.web3j:crypto:4.8.8-android'
         implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
