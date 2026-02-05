@@ -1,364 +1,373 @@
-# **Autobahn**|Java
+# Autobahn|Java
 
-Client library providing [WAMP](http://wamp-proto.org/) on Java 8 ([Netty](https://netty.io/)) and Android, plus (secure) WebSocket for Android.
+A high-performance Java client library for WebSocket and WAMP (Web Application Messaging Protocol) supporting both Java 8+ and Android API 23+.
 
-[![Docker Hub](https://img.shields.io/badge/docker-ready-blue.svg)](https://hub.docker.com/r/crossbario/autobahn-java/)
-[![Travis](https://travis-ci.com/crossbario/autobahn-java.svg?branch=master)](https://travis-ci.com/crossbario/autobahn-java)
-[![Docs](https://javadoc.io/badge/io.crossbar.autobahn/autobahn-android.svg?label=docs)](https://javadoc.io/doc/io.crossbar.autobahn/autobahn-android)
+[![Maven Central](https://img.shields.io/maven-central/v/io.crossbar.autobahn/autobahn-android.svg)](https://search.maven.org/artifact/io.crossbar.autobahn/autobahn-android)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Javadoc](https://javadoc.io/badge/io.crossbar.autobahn/autobahn-android.svg)](https://javadoc.io/doc/io.crossbar.autobahn/autobahn-android)
 
----
+## Overview
 
-Autobahn|Java is a subproject of the [Autobahn project](http://crossbar.io/autobahn/) and provides open-source client implementations for
+Autobahn|Java provides client implementations for:
 
-* **[The WebSocket Protocol](http://tools.ietf.org/html/rfc6455)**
-* **[The Web Application Messaging Protocol (WAMP)](http://wamp-proto.org/)**
+- **[WebSocket Protocol (RFC 6455)](https://tools.ietf.org/html/rfc6455)** - Full-featured WebSocket client for Android
+- **[Web Application Messaging Protocol (WAMP)](https://wamp-proto.org/)** - Complete WAMP v2 client implementation
 
-running on Android and Netty/Java8/JVM.
+### Key Features
 
-The WebSocket layer is using a callback based user API, and is specifically written for Android. Eg it does not run any network stuff on the main (UI) thread.
+- **Dual Platform Support**: Runs on Android (API 23+) and Java 8+ (Netty-based)
+- **Modern Async API**: Built on `CompletableFuture` for WAMP operations
+- **Thread-Safe**: Network operations don't block the Android main/UI thread
+- **Multiple Authentication Methods**: Ticket, Challenge-Response, and Cryptosign authentication
+- **Type-Safe**: Support for POJOs with Jackson serialization
+- **Production-Ready**: MIT licensed, actively maintained, and battle-tested
 
-The WAMP layer is using Java 8 **[CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html)** for WAMP actions (call, register, publish and subscribe) and the **[Observer pattern](https://en.wikipedia.org/wiki/Observer_pattern)** for WAMP session, subscription and registration lifecycle events.
+### Architecture
 
-The library is MIT licensed, maintained by the Crossbar.io Project, tested using the AutobahnTestsuite and published as a JAR to Maven and as a Docker toolchain image to Dockerhub.
+- **WebSocket Layer**: Callback-based API optimized for Android threading model
+- **WAMP Layer**: 
+  - `CompletableFuture`-based API for asynchronous operations (call, register, publish, subscribe)
+  - Observer pattern for lifecycle events (session, subscription, registration)
 
----
+## Installation
 
+### Gradle
 
-## Download
+For Android projects:
+```groovy
+dependencies {
+    implementation 'io.crossbar.autobahn:autobahn-android:21.4.1'
+}
+```
 
-Grab via Maven:
+For Java/Netty projects:
+```groovy
+dependencies {
+    implementation 'io.crossbar.autobahn:autobahn-java:21.4.1'
+}
+```
 
+### Maven
+
+For Android:
 ```xml
 <dependency>
     <groupId>io.crossbar.autobahn</groupId>
     <artifactId>autobahn-android</artifactId>
-    <version>21.7.1</version>
+    <version>21.4.1</version>
 </dependency>
 ```
 
-Gradle:
-```groovy
-dependencies {
-    implementation 'io.crossbar.autobahn:autobahn-android:21.7.1'
-}
+For Java/Netty:
+```xml
+<dependency>
+    <groupId>io.crossbar.autobahn</groupId>
+    <artifactId>autobahn-java</artifactId>
+    <version>21.4.1</version>
+</dependency>
 ```
-For non-android systems use artifactID `autobahn-java` or just
-Download [the latest JAR](https://search.maven.org/remote_content?g=io.crossbar.autobahn&a=autobahn-java&v=LATEST)
 
+## Quick Start
 
-## Getting Started
+### Running the Demo
 
-The demo clients are easy to run, you only need `make` and `docker` installed to get things rolling. </br>
+The project includes demo clients that showcase all library features. Prerequisites: `make` and `docker`.
 
-    $ make crossbar # Starts crossbar in a docker container
-    $ make python # Starts a python based WAMP components that provides calls for the Java demo client
+```bash
+# Start Crossbar.io router
+make crossbar
 
-and finally
+# Start Python WAMP components (provides test procedures)
+make python
 
-    $ make java # Starts the java (Netty) based demo client that performs WAMP actions
+# Run Java/Netty demo client
+make java
+```
 
-## Show me some code
+### Basic Usage
 
-The code in demo-gallery contains some examples on how to use the autobahn library, it also contains convenience methods to use. Below is a basic set of code examples showing all 4 WAMP actions.
-
-### Subscribe to a topic
+#### Creating a Session
 
 ```java
-public void demonstrateSubscribe(Session session, SessionDetails details) {
-    // Subscribe to topic to receive its events.
-    CompletableFuture<Subscription> subFuture = session.subscribe("com.myapp.hello",
-            this::onEvent);
-    subFuture.whenComplete((subscription, throwable) -> {
-        if (throwable == null) {
-            // We have successfully subscribed.
-            System.out.println("Subscribed to topic " + subscription.topic);
+// Create and configure session
+Session session = new Session();
+
+// Add lifecycle listeners
+session.addOnJoinListener(this::onSessionJoined);
+session.addOnLeaveListener(this::onSessionLeft);
+
+// Connect to WAMP router
+Client client = new Client(session, "ws://localhost:8080/ws", "realm1");
+CompletableFuture<ExitInfo> exitFuture = client.connect();
+```
+
+## WAMP Operations
+
+### Subscribe to Topics
+
+```java
+public void onSessionJoined(Session session, SessionDetails details) {
+    CompletableFuture<Subscription> future = session.subscribe(
+        "com.myapp.events", 
+        this::handleEvent
+    );
+    
+    future.whenComplete((subscription, error) -> {
+        if (error == null) {
+            System.out.println("Subscribed to " + subscription.topic);
         } else {
-            // Something went bad.
-            throwable.printStackTrace();
+            error.printStackTrace();
         }
     });
 }
 
-private void onEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
-    System.out.println(String.format("Got event: %s", args.get(0)));
+private void handleEvent(List<Object> args, Map<String, Object> kwargs, EventDetails details) {
+    System.out.println("Event received: " + args.get(0));
 }
 ```
-Since we are only accessing `args` in onEvent(), we could simplify it like:
-```java
-private void onEvent(List<Object> args) {
-    System.out.println(String.format("Got event: %s", args.get(0)));
-}
-```
-### Publish to a topic
+
+### Publish to Topics
 
 ```java
-public void demonstratePublish(Session session, SessionDetails details) {
-    // Publish to a topic that takes a single arguments
-    List<Object> args = Arrays.asList("Hello World!", 900, "UNIQUE");
-    CompletableFuture<Publication> pubFuture = session.publish("com.myapp.hello", args);
-    pubFuture.thenAccept(publication -> System.out.println("Published successfully"));
-    // Shows we can separate out exception handling
-    pubFuture.exceptionally(throwable -> {
-        throwable.printStackTrace();
+// Simple publish
+session.publish("com.myapp.events", "Hello World!")
+    .thenAccept(pub -> System.out.println("Published"))
+    .exceptionally(error -> {
+        error.printStackTrace();
         return null;
     });
-}
-```
-A simpler call would look like:
-```java
-public void demonstratePublish(Session session, SessionDetails details) {
-    CompletableFuture<Publication> pubFuture = session.publish("com.myapp.hello", "Hi!");
-    ...
-}
+
+// Publish with multiple arguments
+List<Object> args = Arrays.asList("message", 42, true);
+session.publish("com.myapp.events", args);
 ```
 
-### Register a procedure
+### Register Procedures
 
 ```java
-public void demonstrateRegister(Session session, SessionDetails details) {
-    // Register a procedure.
-    CompletableFuture<Registration> regFuture = session.register("com.myapp.add2", this::add2);
-    regFuture.thenAccept(registration ->
-            System.out.println("Successfully registered procedure: " + registration.procedure));
+public void registerProcedures(Session session, SessionDetails details) {
+    CompletableFuture<Registration> future = session.register(
+        "com.myapp.add", 
+        this::add
+    );
+    
+    future.thenAccept(reg -> 
+        System.out.println("Registered: " + reg.procedure)
+    );
 }
 
-private CompletableFuture<InvocationResult> add2(
-        List<Object> args, Map<String, Object> kwargs, InvocationDetails details) {
-    int res = (int) args.get(0) + (int) args.get(1);
-    List<Object> arr = new ArrayList<>();
-    arr.add(res);
-    return CompletableFuture.completedFuture(new InvocationResult(arr));
+// Full signature
+private CompletableFuture<InvocationResult> add(
+        List<Object> args, 
+        Map<String, Object> kwargs, 
+        InvocationDetails details) {
+    int sum = (int) args.get(0) + (int) args.get(1);
+    return CompletableFuture.completedFuture(
+        new InvocationResult(Arrays.asList(sum))
+    );
 }
-```
-A very precise `add2` may look like:
-```java
-private List<Object> add2(List<Integer> args, InvocationDetails details) {
-    int res = args.get(0) + args.get(1);
-    return Arrays.asList(res, details.session.getID(), "Java");
-}
-```
 
-### Call a procedure
-
-```java
-public void demonstrateCall(Session session, SessionDetails details) {
-    // Call a remote procedure.
-    CompletableFuture<CallResult> callFuture = session.call("com.myapp.add2", 10, 20);
-    callFuture.thenAccept(callResult ->
-            System.out.println(String.format("Call result: %s", callResult.results.get(0))));
+// Simplified signature
+private List<Object> add(List<Integer> args, InvocationDetails details) {
+    int sum = args.get(0) + args.get(1);
+    return Arrays.asList(sum);
 }
 ```
 
-Calling procedure with variable data type parameters
+### Call Procedures
 
 ```java
-public void demonstrateCall(Session session, SessionDetails details) {
-    // Call a remote procedure.
-    byte[] var1 = new byte[20];
-    String var2 = "A sample text";
-    int var3 = 99;
-    List<Object> args = new ArrayList<>();
-    args.add(var1);
-    args.add(var2);
-    args.add(var3);
-    CompletableFuture<CallResult> callFuture = session.call("com.myapp.myproc", args);
-    callFuture.thenAccept(callResult ->
-            System.out.println(String.format("Call result: %s", callResult.results.get(0))));
-}
-```
-
-### Connecting the dots
-
-```java
-public void main() {
-    // Create a session object
-    Session session = new Session();
-    // Add all onJoin listeners
-    session.addOnJoinListener(this::demonstrateSubscribe);
-    session.addOnJoinListener(this::demonstratePublish);
-    session.addOnJoinListener(this::demonstrateCall);
-    session.addOnJoinListener(this::demonstrateRegister);
-
-    // finally, provide everything to a Client and connect
-    Client client = new Client(session, url, realm);
-    CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-}
-```
-
-### Authentication
-
-Authentication is simple, we just need to create an object of the desired authenticator and
-pass that to the Client
-
-#### Ticket Auth
-```java
-public void main() {
-    ...
-    IAuthenticator authenticator = new TicketAuth(authid, ticket);
-    Client client = new Client(session, url, realm, authenticator);
-    CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-}
-```
-
-#### Challenge Response Auth
-```java
-public void main() {
-    ...
-    IAuthenticator authenticator = new ChallengeResponseAuth(authid, secret);
-    Client client = new Client(session, url, realm, authenticator);
-    CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-}
-```
-
-#### Cryptosign Auth
-```java
-public void main() {
-    ...
-    IAuthenticator authenticator = new CryptosignAuth(authid, privkey, pubkey);
-    Client client = new Client(session, url, realm, authenticator);
-    CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-}
-```
-
-You can also provide a list of Authenticators
-
-```java
-public void main() {
-    ...
-    List<IAuthenticator> authenticators = new ArrayList<>();
-    authenticators.add(new TicketAuth(authid, ticket));
-    authenticators.add(new CryptosignAuth(authid, privkey, pubkey));
-    Client client = new Client(session, url, realm, authenticators);
-    CompletableFuture<ExitInfo> exitInfoCompletableFuture = client.connect();
-}
-```
-
-Autobahn also supports POJOs
-
-Here is how to call a remote procedure that returns a list of Person POJOs
-
-```java
-// Call a remote procedure that returns a Person with id 1
-CompletableFuture<Person> callFuture = mSession.call("com.example.get_person", 1);
-callFuture.whenCompleteAsync((person, throwable) -> {
-    if (throwable != null) {
-        // handle error
-    } else {
-        // success!
-        // do something with person
-    }
-}, mExecutor);
-```
-
-```java
-// call a remote procedure that returns a List<Person>
-CompletableFuture<List<Person>> callFuture = mSession.call(
-        // remote procedure to call
-        "com.example.get_persons_by_department",
-
-        // positional call arguments
-        new ArrayList<Object>() {List.of("department-7")},
-
-        // call return type
-        new TypeReference<List<Person>>() {}
+// Simple call
+CompletableFuture<CallResult> future = session.call("com.myapp.add", 10, 20);
+future.thenAccept(result -> 
+    System.out.println("Result: " + result.results.get(0))
 );
 
-callFuture.whenCompleteAsync((persons, throwable) -> {
-    if (throwable != null) {
-        // handle error
-    } else {
-        // success!
-        for (Person person: persons) {
-            // do something with person
-        }
-    }
-}, mExecutor);
+// Call with mixed types
+byte[] data = new byte[20];
+String message = "test";
+int value = 99;
+session.call("com.myapp.process", Arrays.asList(data, message, value))
+    .thenAccept(result -> processResult(result));
 ```
 
-Also register a procedure that returns a Person
+## Authentication
+
+Autobahn|Java supports multiple authentication methods:
+
+### Ticket Authentication
 
 ```java
-private Person get_person() {
-    return new Person("john", "doe", "hr");
-}
-
-private void main() {
-    CompletableFuture<Registration> regFuture = session.register(
-            "io.crossbar.example.get_person", this::get_person);
-    regFuture.whenComplete((registration, throwable) -> {
-        System.out.println(String.format(
-                "Registered procedure %s", registration.procedure));
-    });
-}
+IAuthenticator auth = new TicketAuth("user@example.com", "secret-ticket");
+Client client = new Client(session, url, realm, auth);
+client.connect();
 ```
 
-### WebSocket on Android
+### Challenge-Response Authentication
 
-Echo example
+```java
+IAuthenticator auth = new ChallengeResponseAuth("user@example.com", "secret");
+Client client = new Client(session, url, realm, auth);
+client.connect();
+```
+
+### Cryptosign Authentication
+
+```java
+IAuthenticator auth = new CryptosignAuth(authid, privateKey, publicKey);
+Client client = new Client(session, url, realm, auth);
+client.connect();
+```
+
+### Multiple Authentication Methods
+
+```java
+List<IAuthenticator> authenticators = Arrays.asList(
+    new TicketAuth(authid, ticket),
+    new CryptosignAuth(authid, privateKey, publicKey)
+);
+Client client = new Client(session, url, realm, authenticators);
+client.connect();
+```
+
+## Working with POJOs
+
+Autobahn|Java supports type-safe operations with Plain Old Java Objects:
+
+### Calling with Type Safety
+
+```java
+// Call returning a single POJO
+CompletableFuture<Person> future = session.call("com.example.get_person", 1);
+future.thenAccept(person -> {
+    System.out.println(person.getName());
+});
+
+// Call returning a list of POJOs
+CompletableFuture<List<Person>> future = session.call(
+    "com.example.get_persons",
+    Collections.singletonList("department-7"),
+    new TypeReference<List<Person>>() {}
+);
+
+future.thenAccept(persons -> {
+    persons.forEach(p -> System.out.println(p.getName()));
+});
+```
+
+### Registering POJO-returning Procedures
+
+```java
+private Person getPerson(List<Object> args, InvocationDetails details) {
+    String id = (String) args.get(0);
+    return new Person("John", "Doe", id);
+}
+
+session.register("com.example.get_person", this::getPerson)
+    .thenAccept(reg -> System.out.println("Registered: " + reg.procedure));
+```
+
+## WebSocket API (Android)
+
+For applications needing direct WebSocket access without WAMP:
 
 ```java
 WebSocketConnection connection = new WebSocketConnection();
+
 connection.connect("wss://echo.websocket.org", new WebSocketConnectionHandler() {
     @Override
     public void onConnect(ConnectionResponse response) {
-        System.out.println("Connected to server");
+        System.out.println("Connected");
     }
 
     @Override
     public void onOpen() {
-        connection.sendMessage("Echo with Autobahn");
-    }
-
-    @Override
-    public void onClose(int code, String reason) {
-        System.out.println("Connection closed");
+        connection.sendMessage("Hello WebSocket");
     }
 
     @Override
     public void onMessage(String payload) {
-        System.out.println("Received message: " + payload);
-        connection.sendMessage(payload);
+        System.out.println("Received: " + payload);
+    }
+
+    @Override
+    public void onClose(int code, String reason) {
+        System.out.println("Connection closed: " + reason);
     }
 });
 ```
 
----
+## Building from Source
 
-### Building from source
+### Android
 
-Building Autobahn is pretty simple
+1. Open the project in Android Studio
+2. Install any missing dependencies when prompted
+3. Build via `Build > Rebuild Project`
+4. Output: `autobahn/build/outputs/aar/`
 
-#### Android build
+### Java/Netty
 
-For Android, we recommend to use Android Studio. Just import the project in
-Android Studio, it will tell you if there are any missing dependencies, install them
-and then just build the project from `Build > Rebuild Project` and you will have the
-aar artifact in `autobahn/build/outputs/aar/`
+Prerequisites: Docker and Make
 
-#### Netty build
-
-To produce a build for non-android systems make sure you have docker and make
-installed then just use run below command on the root directory of the project
-```shell
+```bash
 make build_autobahn
 ```
-and that will output the jar file in `autobahn/build/libs/`.
 
+Output: `autobahn/build/libs/`
 
+## Documentation
 
-## Get in touch
+- [Testing Guide](docs/testing/README.md) - Running tests and integration tests
+- [Publishing Guide](docs/publishing/README.md) - Building and publishing artifacts
+- [Migration to Kotlin](docs/migration-to-kotlin/README.md) - Kotlin migration guide
 
-Get in touch by joining our [forum](https://crossbar.discourse.group/).
+## Requirements
 
----
+### Android
+- Minimum SDK: 23 (Android 6.0)
+- Target SDK: 36
+- Compile SDK: 35
 
+### Java
+- Java 8 or higher
+- Netty 4.1.115+
 
-## Version 1
+## Dependencies
 
-Version 1 of this library is still in the repo [here](https://github.com/crossbario/autobahn-java/tree/version-1), but is no longer maintained.
+Core dependencies include:
+- Jackson 2.18.2 (JSON/CBOR/MessagePack serialization)
+- Netty 4.1.115 (for Java/Netty builds)
+- Web3j 4.12.3 (Ethereum integration)
+- Bouncy Castle (cryptography)
 
-Version 1 only supported non-secure WebSocket on Android and only supported WAMP v1.
+## Contributing
 
-Both of these issues are fixed in the (current) version of Autobahn|Java.
+Contributions are welcome! This is a community-maintained fork of the original Crossbar.io project.
 
----
+**Original Repository**: [crossbario/autobahn-java](https://github.com/crossbario/autobahn-java)
+
+## Community
+
+Join the discussion:
+- [Crossbar.io Forum](https://crossbar.discourse.group/)
+
+## License
+
+Licensed under the [MIT License](LICENSE).
+
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+### Version 1 (Legacy)
+
+The original version 1 of this library is available on the [version-1 branch](https://github.com/crossbario/autobahn-java/tree/version-1) but is no longer maintained. Version 1 had the following limitations:
+- Only supported non-secure WebSocket on Android
+- Only supported WAMP v1
+
+The current version addresses both of these limitations and is recommended for all new projects.
+
+## Acknowledgments
+
+This library is part of the [Autobahn project](http://crossbar.io/autobahn/) family, which provides WebSocket and WAMP implementations across multiple programming languages and platforms.
