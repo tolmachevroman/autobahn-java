@@ -19,7 +19,7 @@ dependencies {
     
     // Cryptography dependencies for WAMP authentication
     implementation 'io.xconn:cryptology:1.1.2'
-    implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
     
     // Backport Java 8 APIs for Android API 23 compatibility
     api 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
