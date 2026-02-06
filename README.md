@@ -31,40 +31,100 @@ Autobahn|Java provides client implementations for:
 
 ## Installation
 
-### Gradle
+### GitHub Packages
 
-For Android projects:
-```groovy
+This fork is published to GitHub Packages. To use it, you need to configure authentication:
+
+#### Setup Credentials
+
+Add to your global `~/.gradle/gradle.properties`:
+```properties
+GPR_USER=your-github-username
+GPR_KEY=ghp_your-classic-github-token
+```
+
+Create a classic GitHub token with `read:packages` scope at: [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+
+#### Gradle (Kotlin DSL)
+
+```kotlin
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+        credentials {
+            username = project.findProperty("GPR_USER") as? String ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("GPR_KEY") as? String ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
 dependencies {
-    implementation 'io.crossbar.autobahn:autobahn-android:21.4.1'
+    // For Android projects
+    implementation("io.crossbar.autobahn:autobahn-android:22.0")
+    
+    // For Java/Netty projects
+    implementation("io.crossbar.autobahn:autobahn-java:22.0")
 }
 ```
 
-For Java/Netty projects:
+#### Gradle (Groovy)
+
 ```groovy
+repositories {
+    maven {
+        url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+        credentials {
+            username = project.findProperty("GPR_USER") ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("GPR_KEY") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
 dependencies {
-    implementation 'io.crossbar.autobahn:autobahn-java:21.4.1'
+    // For Android projects
+    implementation 'io.crossbar.autobahn:autobahn-android:22.0'
+    
+    // For Java/Netty projects
+    implementation 'io.crossbar.autobahn:autobahn-java:22.0'
 }
 ```
 
-### Maven
+#### Maven
 
-For Android:
 ```xml
-<dependency>
-    <groupId>io.crossbar.autobahn</groupId>
-    <artifactId>autobahn-android</artifactId>
-    <version>21.4.1</version>
-</dependency>
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/romantolmachev/autobahn-java</url>
+    </repository>
+</repositories>
+
+<dependencies>
+    <!-- For Android projects -->
+    <dependency>
+        <groupId>io.crossbar.autobahn</groupId>
+        <artifactId>autobahn-android</artifactId>
+        <version>22.0</version>
+    </dependency>
+    
+    <!-- For Java/Netty projects -->
+    <dependency>
+        <groupId>io.crossbar.autobahn</groupId>
+        <artifactId>autobahn-java</artifactId>
+        <version>22.0</version>
+    </dependency>
+</dependencies>
 ```
 
-For Java/Netty:
+Add credentials to `~/.m2/settings.xml`:
 ```xml
-<dependency>
-    <groupId>io.crossbar.autobahn</groupId>
-    <artifactId>autobahn-java</artifactId>
-    <version>21.4.1</version>
-</dependency>
+<servers>
+    <server>
+        <id>github</id>
+        <username>YOUR_GITHUB_USERNAME</username>
+        <password>YOUR_GITHUB_TOKEN</password>
+    </server>
+</servers>
 ```
 
 ## Quick Start
@@ -336,10 +396,10 @@ Output: `autobahn/build/libs/`
 ## Dependencies
 
 Core dependencies include:
-- Jackson 2.18.2 (JSON/CBOR/MessagePack serialization)
+- Jackson 2.21.0 (JSON/CBOR/MessagePack serialization)
 - Netty 4.1.115 (for Java/Netty builds)
-- Web3j 4.12.3 (Ethereum integration)
-- Bouncy Castle (cryptography)
+- Bouncy Castle 1.83 (cryptography)
+- io.xconn:cryptology 1.1.2 (WAMP authentication)
 
 ## Contributing
 
