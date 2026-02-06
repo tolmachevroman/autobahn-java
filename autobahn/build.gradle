@@ -1,7 +1,11 @@
 def IS_ANDROID = project.hasProperty('IS_ANDROID') ? project.IS_ANDROID : true
 def IS_NETTY = project.hasProperty('IS_NETTY') ? project.IS_NETTY : false
 
-apply plugin: IS_ANDROID ? 'com.android.library' : 'java-library'
+if (IS_ANDROID) {
+    apply plugin: 'com.android.library'
+} else {
+    apply plugin: 'java-library'
+}
 apply plugin: 'maven-publish'
 
 def groupID = 'io.crossbar.autobahn'
