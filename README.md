@@ -60,10 +60,10 @@ repositories {
 
 dependencies {
     // For Android projects
-    implementation("io.crossbar.autobahn:autobahn-android:22.0")
+    implementation("io.crossbar.autobahn:autobahn-android:22.1")
     
     // For Java/Netty projects
-    implementation("io.crossbar.autobahn:autobahn-java:22.0")
+    implementation("io.crossbar.autobahn:autobahn-java:22.1")
 }
 ```
 
@@ -82,10 +82,10 @@ repositories {
 
 dependencies {
     // For Android projects
-    implementation 'io.crossbar.autobahn:autobahn-android:22.0'
+    implementation 'io.crossbar.autobahn:autobahn-android:22.1'
     
     // For Java/Netty projects
-    implementation 'io.crossbar.autobahn:autobahn-java:22.0'
+    implementation 'io.crossbar.autobahn:autobahn-java:22.1'
 }
 ```
 
@@ -104,14 +104,14 @@ dependencies {
     <dependency>
         <groupId>io.crossbar.autobahn</groupId>
         <artifactId>autobahn-android</artifactId>
-        <version>22.0</version>
+        <version>22.1</version>
     </dependency>
     
     <!-- For Java/Netty projects -->
     <dependency>
         <groupId>io.crossbar.autobahn</groupId>
         <artifactId>autobahn-java</artifactId>
-        <version>22.0</version>
+        <version>22.1</version>
     </dependency>
 </dependencies>
 ```
