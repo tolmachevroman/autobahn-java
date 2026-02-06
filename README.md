@@ -50,7 +50,7 @@ Create a classic GitHub token with `read:packages` scope at: [GitHub Settings > 
 ```kotlin
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+        url = uri("https://maven.pkg.github.com/tolmachevroman/autobahn-java")
         credentials {
             username = project.findProperty("GPR_USER") as? String ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("GPR_KEY") as? String ?: System.getenv("GITHUB_TOKEN")
@@ -72,7 +72,7 @@ dependencies {
 ```groovy
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+        url = uri("https://maven.pkg.github.com/tolmachevroman/autobahn-java")
         credentials {
             username = project.findProperty("GPR_USER") ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("GPR_KEY") ?: System.getenv("GITHUB_TOKEN")

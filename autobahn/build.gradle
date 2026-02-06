@@ -184,7 +184,7 @@ afterEvaluate {
             // Publish to GitHub Packages
             maven {
                 name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+                url = uri("https://maven.pkg.github.com/tolmachevroman/autobahn-java")
                 credentials {
                     // For local builds, update your global gradle.properties with both variables
                     // GPR_USER must be your Github Username
