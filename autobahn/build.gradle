@@ -7,9 +7,7 @@ apply plugin: 'maven-publish'
 def groupID = 'io.crossbar.autobahn'
 def licenseName = 'MIT'
 def licenseUrl = 'https://opensource.org/licenses/MIT'
-def relVersion = System.getenv().containsKey('AUTOBAHN_BUILD_VERSION') ? 
-        System.getenv('AUTOBAHN_BUILD_VERSION') : '21.4.2-SNAPSHOT'
-def siteUrl = 'https://github.com/crossbario/autobahn-java'
+def relVersion = '22.0'
 
 dependencies {
     api 'com.fasterxml.jackson.core:jackson-core:2.21.0'
@@ -167,24 +165,13 @@ afterEvaluate {
                 version = relVersion
                 
                 pom {
-                    name = 'Autobahn Java'
+                    name = 'Autobahn Java (Fork)'
                     description = 'WebSocket & WAMP for Java8+ and Android API 23+'
-                    url = siteUrl
                     licenses {
                         license {
                             name = licenseName
                             url = licenseUrl
                         }
-                    }
-                    developers {
-                        developer {
-                            id = "crossbario"
-                            name = "Crossbar.io"
-                            email = "support@crossbario.com"
-                        }
-                    }
-                    scm {
-                        url = siteUrl
                     }
                 }
             }
@@ -193,6 +180,21 @@ afterEvaluate {
         repositories {
             // Publish to local Maven repository
             mavenLocal()
+            
+            // Publish to GitHub Packages
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/romantolmachev/autobahn-java")
+                credentials {
+                    // For local builds, update your global gradle.properties with both variables
+                    // GPR_USER must be your Github Username
+                    // GPR_KEY must be the classic ghp_XXX token you create on your account tokens
+                    // For Github Actions builds, both GITHUB_ACTOR and GITHUB_TOKEN env variables will be
+                    // automatically available
+                    username = project.findProperty("GPR_USER") ?: System.getenv("GITHUB_ACTOR")
+                    password = project.findProperty("GPR_KEY") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
         }
     }
 }
