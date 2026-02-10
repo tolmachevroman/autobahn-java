@@ -158,8 +158,37 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 if (IS_ANDROID) {
-                    from components.findByName('release')
+                    // For Android: publish the release AAR
+                    // AGP 9.0+ creates the 'release' component after project evaluation
                     artifactId = 'autobahn-android'
+                    
+                    // Manually add the AAR artifact
+                    artifact("$buildDir/outputs/aar/autobahn-android-release.aar") {
+                        builtBy tasks.named('bundleReleaseAar')
+                    }
+                    
+                    // Add dependencies to POM for Android build
+                    pom.withXml {
+                        def dependenciesNode = asNode().appendNode('dependencies')
+                        configurations.api.allDependencies.each {
+                            if (it.group != null) {
+                                def dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', it.group)
+                                dependencyNode.appendNode('artifactId', it.name)
+                                dependencyNode.appendNode('version', it.version)
+                                dependencyNode.appendNode('scope', 'compile')
+                            }
+                        }
+                        configurations.implementation.allDependencies.each {
+                            if (it.group != null) {
+                                def dependencyNode = dependenciesNode.appendNode('dependency')
+                                dependencyNode.appendNode('groupId', it.group)
+                                dependencyNode.appendNode('artifactId', it.name)
+                                dependencyNode.appendNode('version', it.version)
+                                dependencyNode.appendNode('scope', 'runtime')
+                            }
+                        }
+                    }
                 } else {
                     from components.java
                     artifactId = 'autobahn-java'
