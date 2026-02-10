@@ -12,7 +12,7 @@ apply plugin: 'maven-publish'
 def groupID = 'io.crossbar.autobahn'
 def licenseName = 'MIT'
 def licenseUrl = 'https://opensource.org/licenses/MIT'
-def relVersion = '22.1'
+def relVersion = '22.2'
 
 dependencies {
     api 'com.fasterxml.jackson.core:jackson-core:2.21.0'
