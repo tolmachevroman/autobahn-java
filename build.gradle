@@ -20,11 +20,11 @@ buildscript {
     if (project.properties.get('buildPlatform', 'android') == 'android') {
         dependencies {
             classpath 'com.android.tools.build:gradle:9.0.1'
-            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21'
+            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
         }
     } else {
         dependencies {
-            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21'
+            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21'
         }
     }
 }
