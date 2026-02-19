@@ -7,6 +7,7 @@ if (IS_ANDROID) {
 } else {
     apply plugin: 'java-library'
 }
+apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'maven-publish'
 
 def groupID = 'io.crossbar.autobahn'
@@ -15,6 +16,9 @@ def licenseUrl = 'https://opensource.org/licenses/MIT'
 def relVersion = '22.2'
 
 dependencies {
+    // Kotlin standard library
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.0.21'
+
     api 'com.fasterxml.jackson.core:jackson-core:2.21.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0'
@@ -150,6 +154,10 @@ if (IS_ANDROID) {
     java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
