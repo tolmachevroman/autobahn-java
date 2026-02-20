@@ -75,7 +75,9 @@ if (project.IS_ANDROID) {
     jar {
         version = project.properties.get("buildVersion", "")
     }
-
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }

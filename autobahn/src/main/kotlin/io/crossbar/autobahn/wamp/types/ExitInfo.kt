@@ -1,16 +1,31 @@
 package io.crossbar.autobahn.wamp.types
 
-class ExitInfo {
-    @JvmField val exitCode: Int
+/**
+ * Exit information for session close.
+ *
+ * @property exitCode The exit code (0 for clean exit)
+ * @property reason The reason for exit (may be null)
+ * @property code Compatibility alias for exitCode (deprecated, use exitCode)
+ */
+class ExitInfo(
+    @JvmField val exitCode: Int,
     @JvmField val reason: String?
+) {
+    /**
+     * Compatibility field for code access from Java.
+     * @deprecated Use exitCode instead
+     */
+    @Deprecated("Use exitCode instead")
+    @JvmField
+    val code: Int = exitCode
 
-    constructor(wasClean: Boolean) {
-        this.exitCode = if (wasClean) 0 else 1
-        this.reason = null
-    }
-
-    constructor(exitCode: Int, reason: String?) {
-        this.exitCode = exitCode
-        this.reason = reason
-    }
+    /**
+     * Constructor for clean exit.
+     * @param wasClean true if the exit was clean
+     */
+    @JvmOverloads
+    constructor(wasClean: Boolean) : this(
+        if (wasClean) 0 else 1,
+        null
+    )
 }

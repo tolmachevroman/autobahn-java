@@ -22,8 +22,8 @@ class Unregistered(
             var reason: String? = null
             if (wmsg.size > 2) {
                 val details = wmsg[2] as Map<String, Any>
-                registration = getOrDefault(details, "registration", registration)
-                reason = getOrDefault(details, "reason", reason)
+                registration = getOrDefault(details, "registration", REGISTRATION_NULL) ?: REGISTRATION_NULL
+                reason = getOrDefault(details, "reason", null)
             }
 
             return Unregistered(MessageUtil.parseLong(wmsg[1]), registration, reason)

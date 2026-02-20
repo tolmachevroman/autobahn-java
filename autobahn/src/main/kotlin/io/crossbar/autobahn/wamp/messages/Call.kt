@@ -34,7 +34,7 @@ class Call(
 
             val kwargs = if (wmsg.size > 5) wmsg[5] as? Map<String, Any> else null
 
-            val timeout = getOrDefault(options, "timeout", TIMEOUT_DEFAULT)
+            val timeout = getOrDefault(options, "timeout", TIMEOUT_DEFAULT) ?: TIMEOUT_DEFAULT
 
             return Call(request, procedure, args, kwargs, timeout)
         }

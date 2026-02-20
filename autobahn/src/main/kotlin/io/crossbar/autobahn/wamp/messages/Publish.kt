@@ -34,9 +34,9 @@ class Publish(
 
             val kwargs = if (wmsg.size > 5) wmsg[5] as? Map<String, Any> else null
 
-            val acknowledge = getOrDefault(options, "acknowledge", false)
-            val excludeMe = getOrDefault(options, "exclude_me", true)
-            val retain = getOrDefault(options, "retain", false)
+            val acknowledge = getOrDefault(options, "acknowledge", false) ?: false
+            val excludeMe = getOrDefault(options, "exclude_me", true) ?: true
+            val retain = getOrDefault(options, "retain", false) ?: false
 
             return Publish(request, topic, args, kwargs, acknowledge, excludeMe, retain)
         }

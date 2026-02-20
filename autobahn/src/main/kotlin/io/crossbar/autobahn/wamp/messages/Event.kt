@@ -24,7 +24,7 @@ class Event(
             val publication = MessageUtil.parseLong(wmsg[2])
             val details = wmsg[3] as Map<String, Any>
             val topic = details["topic"] as? String
-            val retained = getOrDefault(details, "retained", false)
+            val retained = getOrDefault(details, "retained", false) ?: false
 
             val args = if (wmsg.size > 4) {
                 if (wmsg[4] is ByteArray) {

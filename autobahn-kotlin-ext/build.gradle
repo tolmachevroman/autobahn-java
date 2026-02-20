@@ -1,0 +1,95 @@
+// Get build platform from root project extension properties
+def IS_ANDROID = rootProject.ext.IS_ANDROID
+def IS_NETTY = rootProject.ext.IS_NETTY
+
+if (IS_ANDROID) {
+    apply plugin: 'com.android.library'
+} else {
+    apply plugin: 'java-library'
+}
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'maven-publish'
+
+def groupID = 'io.crossbar.autobahn'
+def relVersion = '22.2'
+
+dependencies {
+    implementation project(':autobahn')
+    
+    // Kotlin standard library
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.21'
+    
+    // Kotlin coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    
+    // Use the same CompletableFuture backport as the main module
+    compileOnly 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
+}
+
+if (IS_ANDROID) {
+    android {
+        namespace = "io.crossbar.autobahn.wamp.coroutines"
+        defaultConfig {
+            compileSdkVersion 35
+            minSdkVersion 23
+            targetSdkVersion 36
+        }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                if (IS_ANDROID) {
+                    artifactId = 'autobahn-kotlin-ext-android'
+                    artifact("$buildDir/outputs/aar/autobahn-kotlin-ext-release.aar") {
+                        builtBy tasks.named('bundleReleaseAar')
+                    }
+                } else {
+                    from components.java
+                    artifactId = 'autobahn-kotlin-ext-netty'
+                }
+                
+                groupId = groupID
+                version = relVersion
+                
+                pom {
+                    name = 'Autobahn Java Coroutines Extensions'
+                    description = 'Kotlin coroutines extensions for Autobahn Java WAMP library'
+                    licenses {
+                        license {
+                            name = 'MIT'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                }
+            }
+        }
+        
+        repositories {
+            mavenLocal()
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/tolmachevroman/autobahn-java")
+                credentials {
+                    username = project.findProperty("GPR_USER") ?: System.getenv("GITHUB_ACTOR")
+                    password = project.findProperty("GPR_KEY") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
+}
