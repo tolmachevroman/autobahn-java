@@ -6,8 +6,8 @@ if (IS_ANDROID) {
     apply plugin: 'com.android.library'
 } else {
     apply plugin: 'java-library'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
 }
-apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'maven-publish'
 
 def groupID = 'io.crossbar.autobahn'
@@ -20,7 +20,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.21'
     
     // Kotlin coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
     
     // Use the same CompletableFuture backport as the main module
     compileOnly 'net.sourceforge.streamsupport:streamsupport-cfuture:1.7.4'
@@ -39,15 +39,15 @@ if (IS_ANDROID) {
             targetCompatibility JavaVersion.VERSION_17
         }
     }
-}
+} else {
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-kotlin {
-    jvmToolchain(17)
+    kotlin {
+        jvmToolchain(17)
+    }
 }
 
 afterEvaluate {

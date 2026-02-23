@@ -26,12 +26,12 @@ import io.crossbar.autobahn.websocket.types.WebSocketOptions;
 
 public class Connection {
 
-    private FrameProtocol mProtocol;
-    private WebSocketOptions mOptions;
+    private FrameProtocol protocol;
+    private WebSocketOptions options;
 
     public Connection(WebSocketOptions options) {
-        mOptions = options;
-        mProtocol = new FrameProtocol();
+        this.options = options;
+        this.protocol = new FrameProtocol();
     }
 
     private byte[] sendText(String payload) throws ParseFailed {
@@ -45,28 +45,28 @@ public class Connection {
     }
 
     private byte[] sendText(byte[] payload) throws ParseFailed {
-        if (payload.length > mOptions.getMaxMessagePayloadSize()) {
+        if (payload.length > options.getMaxMessagePayloadSize()) {
             throw new ParseFailed("message payload exceeds payload limit");
         }
-        return mProtocol.sendText(payload);
+        return protocol.sendText(payload);
     }
 
     public byte[] send(Message msg) throws ParseFailed {
         if (msg instanceof TextMessage) {
-            return sendText(((TextMessage) msg).mPayload);
+            return sendText(((TextMessage) msg).payload);
         } else if (msg instanceof RawTextMessage) {
-            return sendText(((RawTextMessage) msg).mPayload);
+            return sendText(((RawTextMessage) msg).payload);
         } else if (msg instanceof BinaryMessage) {
-            if (((BinaryMessage) msg).mPayload.length > mOptions.getMaxMessagePayloadSize()) {
+            if (((BinaryMessage) msg).payload.length > options.getMaxMessagePayloadSize()) {
                 throw new ParseFailed("message payload exceeds payload limit");
             }
-            return mProtocol.sendBinary(((BinaryMessage) msg).mPayload);
+            return protocol.sendBinary(((BinaryMessage) msg).payload);
         } else if (msg instanceof Ping) {
-            return mProtocol.ping(((Ping) msg).mPayload);
+            return protocol.ping(((Ping) msg).payload);
         } else if (msg instanceof Pong) {
-            return mProtocol.pong(((Pong) msg).mPayload);
+            return protocol.pong(((Pong) msg).payload);
         } else if (msg instanceof Close) {
-            return mProtocol.close(((Close) msg).mCode, ((Close) msg).mReason);
+            return protocol.close(((Close) msg).code, ((Close) msg).reason);
         } else if (msg instanceof ClientHandshake) {
             return Handshake.handshake((ClientHandshake) msg);
         } else {

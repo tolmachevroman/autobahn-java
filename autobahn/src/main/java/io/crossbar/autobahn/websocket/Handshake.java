@@ -37,15 +37,15 @@ public class Handshake {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         // write HTTP header with handshake
         String path;
-        if (message.mQuery != null) {
-            path = message.mPath + "?" + message.mQuery;
+        if (message.query != null) {
+            path = message.path + "?" + message.query;
         } else {
-            path = message.mPath;
+            path = message.path;
         }
         try {
             buffer.write(bytes(String.format("GET %s HTTP/1.1", path)));
             buffer.write(bytes(CRLF));
-            buffer.write(bytes("Host: " + message.mHost));
+            buffer.write(bytes("Host: " + message.host));
             buffer.write(bytes(CRLF));
             buffer.write(bytes("Upgrade: WebSocket"));
             buffer.write(bytes(CRLF));
@@ -53,16 +53,16 @@ public class Handshake {
             buffer.write(bytes(CRLF));
             buffer.write(bytes("Sec-WebSocket-Key: " + newHandshakeKey()));
             buffer.write(bytes(CRLF));
-            if (message.mOrigin != null && !message.mOrigin.equals("")) {
-                buffer.write(bytes("Origin: " + message.mOrigin));
+            if (message.origin != null && !message.origin.equals("")) {
+                buffer.write(bytes("Origin: " + message.origin));
                 buffer.write(bytes(CRLF));
             }
 
-            if (message.mSubprotocols != null && message.mSubprotocols.length > 0) {
+            if (message.subprotocols != null && message.subprotocols.length > 0) {
                 buffer.write(bytes("Sec-WebSocket-Protocol: "));
-                for (int i = 0; i < message.mSubprotocols.length; ++i) {
-                    buffer.write(bytes(message.mSubprotocols[i]));
-                    if (i != message.mSubprotocols.length - 1) {
+                for (int i = 0; i < message.subprotocols.length; ++i) {
+                    buffer.write(bytes(message.subprotocols[i]));
+                    if (i != message.subprotocols.length - 1) {
                         buffer.write(bytes(", "));
                     }
                 }
@@ -73,9 +73,9 @@ public class Handshake {
             buffer.write(bytes(CRLF));
 
             // Header injection
-            if (message.mHeaderList != null) {
-                for (String key : message.mHeaderList.keySet()) {
-                    buffer.write(bytes(key + ":" + message.mHeaderList.get(key)));
+            if (message.headerList != null) {
+                for (String key : message.headerList.keySet()) {
+                    buffer.write(bytes(key + ":" + message.headerList.get(key)));
                     buffer.write(bytes(CRLF));
                 }
             }
