@@ -5,6 +5,8 @@ A high-performance Java client library for WebSocket and WAMP (Web Application M
 [![Maven Central](https://img.shields.io/maven-central/v/io.crossbar.autobahn/autobahn-android.svg)](https://search.maven.org/artifact/io.crossbar.autobahn/autobahn-android)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Javadoc](https://javadoc.io/badge/io.crossbar.autobahn/autobahn-android.svg)](https://javadoc.io/doc/io.crossbar.autobahn/autobahn-android)
+[![Tests](https://img.shields.io/badge/tests-225%2B-green.svg)](docs/tests/README.md)
+[![Coverage](https://img.shields.io/badge/coverage-JaCoCo-orange.svg)](docs/tests/README.md)
 
 ## Overview
 
@@ -683,9 +685,46 @@ make build_autobahn
 
 Output: `autobahn/build/libs/`
 
+## Testing
+
+The project has a comprehensive test suite with **225+ tests** covering WAMP messages, WebSocket protocol, authentication, and utilities.
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew :autobahn:test
+
+# Run tests with coverage (JaCoCo)
+./gradlew :autobahn:test :autobahn:jacocoTestReport
+```
+
+### Code Coverage
+
+JaCoCo is integrated for both Android and Netty builds:
+
+**View coverage report:**
+- HTML: `autobahn/build/reports/jacoco/jacocoTestReport/html/index.html`
+- XML: `autobahn/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml`
+
+**Current Coverage:** See [docs/tests/README.md](docs/tests/README.md) for detailed coverage breakdown.
+
+### Test Structure
+
+| Component | Test Files | Tests |
+|-----------|-----------|-------|
+| WAMP Authentication | 3 | 18 |
+| WAMP Messages | 13 | 102 |
+| WAMP Types | 5 | 29 |
+| WAMP Utilities | 2 | 17 |
+| WebSocket Protocol | 3 | 34 |
+| WebSocket Types | 1 | 16 |
+| **Total** | **26** | **225+** |
+
 ## Documentation
 
 - [Testing Guide](docs/testing/README.md) - Running tests and integration tests
+- [Test Coverage](docs/tests/README.md) - Detailed test coverage documentation
 - [Publishing Guide](docs/publishing/README.md) - Building and publishing artifacts
 - [Migration to Kotlin](docs/migration-to-kotlin/README.md) - Kotlin migration guide
 

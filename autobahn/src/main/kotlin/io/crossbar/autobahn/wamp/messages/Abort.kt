@@ -16,7 +16,7 @@ class Abort(
         fun parse(wmsg: List<Any>): Abort {
             MessageUtil.validateMessage(wmsg, MESSAGE_TYPE, "ABORT", 3)
             val details = wmsg[1] as Map<String, Any>
-            val message = getOrDefault(details, "message", null)
+            val message = details["message"] as? String
             val reason = wmsg[2] as String
             return Abort(reason, message)
         }

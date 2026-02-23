@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 // Get build platform from root project extension properties
 def IS_ANDROID = rootProject.ext.IS_ANDROID
 def IS_NETTY = rootProject.ext.IS_NETTY
@@ -65,6 +67,9 @@ if (IS_ANDROID) {
             release {
                 minifyEnabled false
                 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
+            }
+            debug {
+                testCoverageEnabled true
             }
         }
         sourceSets {
@@ -160,6 +165,41 @@ if (IS_ANDROID) {
     
     kotlin {
         jvmToolchain(17)
+    }
+    
+    // JaCoCo for non-Android builds
+    jacoco {
+        toolVersion = "0.8.11"
+    }
+    
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+}
+
+// JaCoCo task for Android
+if (IS_ANDROID) {
+    tasks.register('jacocoTestReport', JacocoReport) {
+        dependsOn 'testDebugUnitTest'
+        
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        
+        def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', 
+                          '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+        def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug", excludes: fileFilter)
+        def kotlinDebugTree = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+        def mainSrc = "${project.projectDir}/src/main/java"
+        
+        sourceDirectories.from = files([mainSrc])
+        classDirectories.from = files([debugTree], [kotlinDebugTree])
+        executionData.from = files("${buildDir}/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
     }
 }
 

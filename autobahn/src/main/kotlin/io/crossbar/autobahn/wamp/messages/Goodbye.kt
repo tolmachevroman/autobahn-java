@@ -16,7 +16,7 @@ class Goodbye(
         fun parse(wmsg: List<Any>): Goodbye {
             MessageUtil.validateMessage(wmsg, MESSAGE_TYPE, "GOODBYE", 3)
             val details = wmsg[1] as Map<String, Any>
-            val message = if (details.containsKey("message")) details["message"] as? String else null
+            val message = details["message"] as? String
             return Goodbye(wmsg[2] as String, message)
         }
     }
