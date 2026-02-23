@@ -96,6 +96,7 @@ if (project.IS_ANDROID) {
             java {
                 include 'io/crossbar/autobahn/demogallery/netty/**'
                 include 'io/crossbar/autobahn/demogallery/ExampleClient.java'
+                include 'io/crossbar/autobahn/demogallery/IntegrationTest.java'
                 include 'io/crossbar/autobahn/demogallery/data/**'
                 exclude 'io/crossbar/autobahn/demogallery/android/**'
             }
@@ -104,6 +105,29 @@ if (project.IS_ANDROID) {
 
     jar {
         version = project.properties.get("buildVersion", "")
+    }
+
+    // Additional start script for integration test - put in separate directory
+    task integrationTestStartScripts(type: CreateStartScripts) {
+        dependsOn startScripts
+        mainClass = 'io.crossbar.autobahn.demogallery.IntegrationTest'
+        applicationName = 'integration-test'
+        outputDir = new File(project.buildDir, 'scripts-integration')
+        classpath = startScripts.classpath
+    }
+
+    // Custom installDist that includes both main and integration test scripts
+    installDist {
+        dependsOn integrationTestStartScripts
+        doLast {
+            copy {
+                from(integrationTestStartScripts.outputDir) {
+                    include 'integration-test*'
+                }
+                into new File(project.buildDir, 'install/demo-gallery/bin')
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            }
+        }
     }
 
     java {

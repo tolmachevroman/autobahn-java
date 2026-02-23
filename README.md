@@ -5,8 +5,8 @@ A high-performance Java client library for WebSocket and WAMP (Web Application M
 [![Maven Central](https://img.shields.io/maven-central/v/io.crossbar.autobahn/autobahn-android.svg)](https://search.maven.org/artifact/io.crossbar.autobahn/autobahn-android)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Javadoc](https://javadoc.io/badge/io.crossbar.autobahn/autobahn-android.svg)](https://javadoc.io/doc/io.crossbar.autobahn/autobahn-android)
-[![Tests](https://img.shields.io/badge/tests-225%2B-green.svg)](docs/tests/README.md)
-[![Coverage](https://img.shields.io/badge/coverage-JaCoCo-orange.svg)](docs/tests/README.md)
+[![Tests](https://github.com/tolmachevroman/autobahn-java/actions/workflows/main.yml/badge.svg)](https://github.com/tolmachevroman/autobahn-java/actions)
+[![codecov](https://codecov.io/gh/tolmachevroman/autobahn-java/branch/master/graph/badge.svg)](https://codecov.io/gh/tolmachevroman/autobahn-java)
 
 ## Overview
 
