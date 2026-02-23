@@ -23,8 +23,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Run unit tests
-        run: ./gradlew :autobahn:testDebugUnitTest
+      - name: Run unit tests with coverage
+        run: ./gradlew :autobahn:testDebugUnitTest :autobahn:jacocoTestReport
 
       - name: Build android library
         run: ./gradlew :autobahn:build
@@ -37,6 +37,13 @@ jobs:
           path: |
             autobahn/build/reports/tests/
             autobahn/build/test-results/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: autobahn/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Build Docker image for integration tests
         run: docker build -t autobahn-java:netty -f docker/Dockerfile.netty --build-arg AUTOBAHN_JAVA_VERSION=test .
