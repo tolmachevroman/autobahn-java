@@ -57,5 +57,5 @@ jobs:
         timeout-minutes: 2
         run: |
           docker run --rm -i --link crossbar -v ${PWD}:/workspace autobahn-java:netty /bin/bash -c \
-            "gradle installDist -PbuildPlatform=netty && \
+            "gradle :demo-gallery:clean :demo-gallery:installDist -PbuildPlatform=netty && \
              /workspace/demo-gallery/build/install/demo-gallery/bin/integration-test ws://crossbar:8080/ws realm1"
