@@ -5,6 +5,8 @@ A high-performance Java client library for WebSocket and WAMP (Web Application M
 [![Maven Central](https://img.shields.io/maven-central/v/io.crossbar.autobahn/autobahn-android.svg)](https://search.maven.org/artifact/io.crossbar.autobahn/autobahn-android)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Javadoc](https://javadoc.io/badge/io.crossbar.autobahn/autobahn-android.svg)](https://javadoc.io/doc/io.crossbar.autobahn/autobahn-android)
+[![Tests](https://github.com/tolmachevroman/autobahn-java/actions/workflows/main.yml/badge.svg)](https://github.com/tolmachevroman/autobahn-java/actions)
+[![codecov](https://codecov.io/gh/tolmachevroman/autobahn-java/branch/master/graph/badge.svg)](https://codecov.io/gh/tolmachevroman/autobahn-java)
 
 ## Overview
 
@@ -17,6 +19,9 @@ Autobahn|Java provides client implementations for:
 
 - **Dual Platform Support**: Runs on Android (API 23+) and Java 8+ (Netty-based)
 - **Modern Async API**: Built on `CompletableFuture` for WAMP operations
+- **Kotlin First**: 80% of the library is now Kotlin with full Java interoperability
+- **Coroutine Support**: Optional `autobahn-kotlin-ext` module provides Kotlin coroutines and Flow APIs
+- **Jetpack Compose Ready**: Easy integration with Android's modern UI toolkit
 - **Thread-Safe**: Network operations don't block the Android main/UI thread
 - **Multiple Authentication Methods**: Ticket, Challenge-Response, and Cryptosign authentication
 - **Type-Safe**: Support for POJOs with Jackson serialization
@@ -60,10 +65,16 @@ repositories {
 
 dependencies {
     // For Android projects
-    implementation("io.crossbar.autobahn:autobahn-android:22.1")
+    implementation("io.crossbar.autobahn:autobahn-android:22.2")
     
     // For Java/Netty projects
-    implementation("io.crossbar.autobahn:autobahn-java:22.1")
+    implementation("io.crossbar.autobahn:autobahn-java:22.2")
+    
+    // Optional: Kotlin coroutines extension
+    // For Android:
+    implementation("io.crossbar.autobahn:autobahn-kotlin-ext-android:22.2")
+    // For Netty/JVM:
+    implementation("io.crossbar.autobahn:autobahn-kotlin-ext-netty:22.2")
 }
 ```
 
@@ -82,10 +93,16 @@ repositories {
 
 dependencies {
     // For Android projects
-    implementation 'io.crossbar.autobahn:autobahn-android:22.1'
+    implementation 'io.crossbar.autobahn:autobahn-android:22.2'
     
     // For Java/Netty projects
-    implementation 'io.crossbar.autobahn:autobahn-java:22.1'
+    implementation 'io.crossbar.autobahn:autobahn-java:22.2'
+    
+    // Optional: Kotlin coroutines extension
+    // For Android:
+    implementation 'io.crossbar.autobahn:autobahn-kotlin-ext-android:22.2'
+    // For Netty/JVM:
+    implementation 'io.crossbar.autobahn:autobahn-kotlin-ext-netty:22.2'
 }
 ```
 
@@ -104,14 +121,28 @@ dependencies {
     <dependency>
         <groupId>io.crossbar.autobahn</groupId>
         <artifactId>autobahn-android</artifactId>
-        <version>22.1</version>
+        <version>22.2</version>
     </dependency>
     
     <!-- For Java/Netty projects -->
     <dependency>
         <groupId>io.crossbar.autobahn</groupId>
         <artifactId>autobahn-java</artifactId>
-        <version>22.1</version>
+        <version>22.2</version>
+    </dependency>
+    
+    <!-- Optional: Kotlin coroutines extension (Android) -->
+    <dependency>
+        <groupId>io.crossbar.autobahn</groupId>
+        <artifactId>autobahn-kotlin-ext-android</artifactId>
+        <version>22.2</version>
+    </dependency>
+    
+    <!-- Optional: Kotlin coroutines extension (Netty) -->
+    <dependency>
+        <groupId>io.crossbar.autobahn</groupId>
+        <artifactId>autobahn-kotlin-ext-netty</artifactId>
+        <version>22.2</version>
     </dependency>
 </dependencies>
 ```
@@ -251,6 +282,284 @@ session.call("com.myapp.process", Arrays.asList(data, message, value))
     .thenAccept(result -> processResult(result));
 ```
 
+## Kotlin Coroutines API
+
+The optional `autobahn-kotlin-ext` module provides idiomatic Kotlin APIs using coroutines and Flow.
+
+### Setup
+
+Add the Kotlin extension dependency:
+
+```kotlin
+dependencies {
+    // For Android:
+    implementation("io.crossbar.autobahn:autobahn-android:22.2")
+    implementation("io.crossbar.autobahn:autobahn-kotlin-ext-android:22.2")
+    
+    // For Netty/JVM:
+    implementation("io.crossbar.autobahn:autobahn-java:22.2")
+    implementation("io.crossbar.autobahn:autobahn-kotlin-ext-netty:22.2")
+}
+```
+
+### Using Suspend Functions
+
+Replace `CompletableFuture` callbacks with clean, sequential code:
+
+```kotlin
+import io.crossbar.autobahn.wamp.coroutines.*
+import kotlinx.coroutines.*
+
+class MyWampClient {
+    private val session = Session()
+    
+    suspend fun connect(url: String, realm: String) {
+        // Connect using the Client class
+        val client = Client(session, url, realm)
+        
+        // Launch connection in background
+        launch(Dispatchers.IO) {
+            client.connect()
+        }
+        
+        // Join the realm (suspend until joined)
+        val sessionDetails = session.joinSuspend(realm)
+        println("Joined realm: ${sessionDetails.realm}")
+    }
+    
+    suspend fun subscribeToEvents() {
+        // Subscribe and wait for confirmation
+        val subscription = session.subscribeSuspend("com.myapp.events") { args ->
+            println("Event received: ${args?.firstOrNull()}")
+        }
+        println("Subscribed to: ${subscription.topic}")
+    }
+    
+    suspend fun callRemoteProcedure() {
+        // Call procedure and get result
+        val result = session.callSuspend("com.myapp.add", listOf(10, 20))
+        println("Sum: ${result.results.firstOrNull()}")
+    }
+    
+    suspend fun publishEvent() {
+        // Publish and confirm
+        val publication = session.publishSuspend(
+            "com.myapp.notifications",
+            args = listOf("User logged in", 42)
+        )
+        println("Published with ID: ${publication.publication}")
+    }
+}
+```
+
+### Using Kotlin Flow
+
+Reactive-style subscriptions with automatic cleanup:
+
+```kotlin
+import kotlinx.coroutines.flow.*
+
+class EventViewModel : ViewModel() {
+    private val session = Session()
+    
+    // Convert WAMP events to Flow
+    val eventsFlow: Flow<String> = session.subscribeAsFlow("com.myapp.events")
+        .map { args -> args?.firstOrNull()?.toString() ?: "Unknown" }
+        .catch { error ->
+            emit("Error: ${error.message}")
+        }
+        .flowOn(Dispatchers.IO)
+    
+    // Collect in ViewModel
+    fun startCollecting() {
+        viewModelScope.launch {
+            eventsFlow.collect { eventData ->
+                println("Received: $eventData")
+            }
+        }
+    }
+}
+```
+
+### Complete Kotlin Example
+
+```kotlin
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
+import io.crossbar.autobahn.wamp.Session
+import io.crossbar.autobahn.wamp.Client
+import io.crossbar.autobahn.wamp.coroutines.*
+import kotlinx.coroutines.*
+
+class MainActivity : ComponentActivity() {
+    private val session = Session()
+    private var subscription: Subscription? = null
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // Connect in lifecycle scope
+        lifecycleScope.launch {
+            try {
+                connectToWamp()
+            } catch (e: Exception) {
+                println("Connection failed: ${e.message}")
+            }
+        }
+        
+        setContent {
+            MyApp()
+        }
+    }
+    
+    private suspend fun connectToWamp() {
+        val client = Client(session, "ws://localhost:8080/ws", "realm1")
+        
+        // Start connection
+        withContext(Dispatchers.IO) {
+            client.connect()
+        }
+        
+        // Join realm
+        val details = session.joinSuspend("realm1")
+        println("Joined: ${details.realm}")
+        
+        // Subscribe to events
+        subscription = session.subscribeSuspend("com.myapp.updates") { args ->
+            println("Update: ${args?.firstOrNull()}")
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycleScope.launch {
+            subscription?.let { session.unsubscribeSuspend(it) }
+            session.leave()
+        }
+    }
+}
+```
+
+## Jetpack Compose Integration
+
+Combine the power of WAMP with modern Android UI:
+
+```kotlin
+import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import io.crossbar.autobahn.wamp.Session
+import io.crossbar.autobahn.wamp.coroutines.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+
+// ViewModel with WAMP
+class ChatViewModel : ViewModel() {
+    private val session = Session()
+    private var _isConnected = MutableStateFlow(false)
+    private var _messages = MutableStateFlow<List<String>>(emptyList())
+    
+    val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+    val messages: StateFlow<List<String>> = _messages.asStateFlow()
+    
+    init {
+        connect()
+    }
+    
+    private fun connect() {
+        viewModelScope.launch {
+            try {
+                val client = Client(session, "ws://localhost:8080/ws", "chat")
+                
+                // Connect and join
+                withContext(Dispatchers.IO) {
+                    client.connect()
+                }
+                session.joinSuspend("chat")
+                _isConnected.value = true
+                
+                // Subscribe to messages as Flow
+                session.subscribeAsFlow("com.chat.messages")
+                    .map { args -> args?.firstOrNull()?.toString() ?: "" }
+                    .collect { message ->
+                        _messages.value = _messages.value + message
+                    }
+            } catch (e: Exception) {
+                _isConnected.value = false
+            }
+        }
+    }
+    
+    fun sendMessage(text: String) {
+        viewModelScope.launch {
+            session.publishSuspend("com.chat.messages", args = listOf(text))
+        }
+    }
+    
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            session.leave()
+        }
+    }
+}
+
+// Compose UI
+@Composable
+fun ChatScreen(viewModel: ChatViewModel = viewModel()) {
+    val isConnected by viewModel.isConnected.collectAsState()
+    val messages by viewModel.messages.collectAsState()
+    var inputText by remember { mutableStateOf("") }
+    
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // Connection status
+        if (isConnected) {
+            Text("Connected", color = MaterialTheme.colorScheme.primary)
+        } else {
+            Text("Connecting...", color = MaterialTheme.colorScheme.error)
+        }
+        
+        // Messages list
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(messages) { message ->
+                Text(message, modifier = Modifier.padding(8.dp))
+            }
+        }
+        
+        // Input field
+        Row {
+            TextField(
+                value = inputText,
+                onValueChange = { inputText = it },
+                modifier = Modifier.weight(1f)
+            )
+            Button(
+                onClick = {
+                    viewModel.sendMessage(inputText)
+                    inputText = ""
+                },
+                enabled = isConnected && inputText.isNotBlank()
+            ) {
+                Text("Send")
+            }
+        }
+    }
+}
+```
+
+### Benefits of Kotlin + Compose Integration
+
+1. **Reactive UI**: Flow automatically updates Compose UI when WAMP events arrive
+2. **Structured Concurrency**: `viewModelScope` ensures proper cleanup
+3. **Type Safety**: Kotlin's type system catches errors at compile time
+4. **Clean Code**: Suspend functions eliminate callback hell
+5. **Lifecycle Aware**: Automatic handling of Android lifecycle events
+
 ## Authentication
 
 Autobahn|Java supports multiple authentication methods:
@@ -376,9 +685,46 @@ make build_autobahn
 
 Output: `autobahn/build/libs/`
 
+## Testing
+
+The project has a comprehensive test suite with **225+ tests** covering WAMP messages, WebSocket protocol, authentication, and utilities.
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew :autobahn:test
+
+# Run tests with coverage (JaCoCo)
+./gradlew :autobahn:test :autobahn:jacocoTestReport
+```
+
+### Code Coverage
+
+JaCoCo is integrated for both Android and Netty builds:
+
+**View coverage report:**
+- HTML: `autobahn/build/reports/jacoco/jacocoTestReport/html/index.html`
+- XML: `autobahn/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml`
+
+**Current Coverage:** See [docs/tests/README.md](docs/tests/README.md) for detailed coverage breakdown.
+
+### Test Structure
+
+| Component | Test Files | Tests |
+|-----------|-----------|-------|
+| WAMP Authentication | 3 | 18 |
+| WAMP Messages | 13 | 102 |
+| WAMP Types | 5 | 29 |
+| WAMP Utilities | 2 | 17 |
+| WebSocket Protocol | 3 | 34 |
+| WebSocket Types | 1 | 16 |
+| **Total** | **26** | **225+** |
+
 ## Documentation
 
 - [Testing Guide](docs/testing/README.md) - Running tests and integration tests
+- [Test Coverage](docs/tests/README.md) - Detailed test coverage documentation
 - [Publishing Guide](docs/publishing/README.md) - Building and publishing artifacts
 - [Migration to Kotlin](docs/migration-to-kotlin/README.md) - Kotlin migration guide
 

@@ -1,3 +1,5 @@
+apply plugin: 'jacoco'
+
 // Get build platform from root project extension properties
 def IS_ANDROID = rootProject.ext.IS_ANDROID
 def IS_NETTY = rootProject.ext.IS_NETTY
@@ -7,6 +9,9 @@ if (IS_ANDROID) {
 } else {
     apply plugin: 'java-library'
 }
+if (!IS_ANDROID) {
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+}
 apply plugin: 'maven-publish'
 
 def groupID = 'io.crossbar.autobahn'
@@ -15,6 +20,9 @@ def licenseUrl = 'https://opensource.org/licenses/MIT'
 def relVersion = '22.2'
 
 dependencies {
+    // Kotlin standard library
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.2.21'
+
     api 'com.fasterxml.jackson.core:jackson-core:2.21.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.0'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0'
@@ -59,6 +67,9 @@ if (IS_ANDROID) {
             release {
                 minifyEnabled false
                 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
+            }
+            debug {
+                testCoverageEnabled true
             }
         }
         sourceSets {
@@ -150,6 +161,45 @@ if (IS_ANDROID) {
     java {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    
+    kotlin {
+        jvmToolchain(17)
+    }
+    
+    // JaCoCo for non-Android builds
+    jacoco {
+        toolVersion = "0.8.11"
+    }
+    
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
+}
+
+// JaCoCo task for Android
+if (IS_ANDROID) {
+    tasks.register('jacocoTestReport', JacocoReport) {
+        dependsOn 'testDebugUnitTest'
+        
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        
+        def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', 
+                          '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+        def debugTree = fileTree(dir: "${buildDir}/intermediates/javac/debug", excludes: fileFilter)
+        def kotlinDebugTree = fileTree(dir: "${buildDir}/tmp/kotlin-classes/debug", excludes: fileFilter)
+        def mainSrc = "${project.projectDir}/src/main/java"
+        
+        sourceDirectories.from = files([mainSrc])
+        classDirectories.from = files([debugTree], [kotlinDebugTree])
+        executionData.from = files("${buildDir}/outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
     }
 }
 

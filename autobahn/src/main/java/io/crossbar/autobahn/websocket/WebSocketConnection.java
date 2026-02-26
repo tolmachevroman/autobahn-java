@@ -165,10 +165,10 @@ public class WebSocketConnection implements IWebSocket {
 
                     // start WebSocket handshake
                     ClientHandshake hs = new ClientHandshake(mWsHost + ":" + mWsPort);
-                    hs.mPath = mWsPath;
-                    hs.mQuery = mWsQuery;
-                    hs.mSubprotocols = mWsSubprotocols;
-                    hs.mHeaderList = mWsHeaders;
+                    hs.path = mWsPath;
+                    hs.query = mWsQuery;
+                    hs.subprotocols = mWsSubprotocols;
+                    hs.headerList = mWsHeaders;
                     sendMessage(hs);
                     mPrevConnected = true;
 
@@ -565,7 +565,7 @@ public class WebSocketConnection implements IWebSocket {
                     TextMessage textMessage = (TextMessage) message;
 
                     if (mWsHandler != null) {
-                        mWsHandler.onMessage(textMessage.mPayload);
+                        mWsHandler.onMessage(textMessage.payload);
                     } else {
                         LOGGER.d("could not call onTextMessage() .. handler already NULL");
                     }
@@ -575,7 +575,7 @@ public class WebSocketConnection implements IWebSocket {
                     RawTextMessage rawTextMessage = (RawTextMessage) message;
 
                     if (mWsHandler != null) {
-                        mWsHandler.onMessage(rawTextMessage.mPayload, false);
+                        mWsHandler.onMessage(rawTextMessage.payload, false);
                     } else {
                         LOGGER.d("could not call onRawTextMessage() .. handler already NULL");
                     }
@@ -585,7 +585,7 @@ public class WebSocketConnection implements IWebSocket {
                     BinaryMessage binaryMessage = (BinaryMessage) message;
 
                     if (mWsHandler != null) {
-                        mWsHandler.onMessage(binaryMessage.mPayload, true);
+                        mWsHandler.onMessage(binaryMessage.payload, true);
                     } else {
                         LOGGER.d("could not call onBinaryMessage() .. handler already NULL");
                     }
@@ -595,19 +595,19 @@ public class WebSocketConnection implements IWebSocket {
                     Ping ping = (Ping) message;
                     LOGGER.d("WebSocket Ping received");
 
-                    if (ping.mPayload == null) {
+                    if (ping.payload == null) {
                         mWsHandler.onPing();
                     } else {
-                        mWsHandler.onPing(ping.mPayload);
+                        mWsHandler.onPing(ping.payload);
                     }
 
                 } else if (message instanceof Pong) {
                     Pong pong = (Pong) message;
 
-                    if (pong.mPayload == null) {
+                    if (pong.payload == null) {
                         mWsHandler.onPong();
                     } else {
-                        mWsHandler.onPong(pong.mPayload);
+                        mWsHandler.onPong(pong.payload);
                     }
 
                     // We already received a pong, cancel the timeout executor
@@ -621,22 +621,22 @@ public class WebSocketConnection implements IWebSocket {
 
                     Close close = (Close) message;
 
-                    final int crossbarCloseCode = (close.mCode == 1000) ? IWebSocketConnectionHandler.CLOSE_NORMAL : IWebSocketConnectionHandler.CLOSE_CONNECTION_LOST;
+                    final int crossbarCloseCode = (close.code == 1000) ? IWebSocketConnectionHandler.CLOSE_NORMAL : IWebSocketConnectionHandler.CLOSE_CONNECTION_LOST;
 
-                    if (close.mIsReply) {
-                        LOGGER.d("WebSocket Close received (" + close.mCode + " - " + close.mReason + ")");
+                    if (close.isReply) {
+                        LOGGER.d("WebSocket Close received (" + close.code + " - " + close.reason + ")");
                         closeAndCleanup();
-                        onClose(crossbarCloseCode, close.mReason);
+                        onClose(crossbarCloseCode, close.reason);
                     } else if (mActive) {
                         // We have received a close frame, lets clean.
                         closeReaderThread(false);
                         WebSocketConnection.this.sendMessage(new Close(1000, true));
                         mActive = false;
                     } else {
-                        LOGGER.d("WebSocket Close received (" + close.mCode + " - " + close.mReason + ")");
+                        LOGGER.d("WebSocket Close received (" + close.code + " - " + close.reason + ")");
                         // we've initiated disconnect, so ready to close the channel
                         closeAndCleanup();
-                        onClose(crossbarCloseCode, close.mReason);
+                        onClose(crossbarCloseCode, close.reason);
                     }
 
                 } else if (message instanceof ServerHandshake) {
@@ -682,13 +682,13 @@ public class WebSocketConnection implements IWebSocket {
 
                     Error error = (Error) message;
                     failConnection(IWebSocketConnectionHandler.CLOSE_INTERNAL_ERROR,
-                            "WebSocket internal error (" + error.mException.toString() + ")");
+                            "WebSocket internal error (" + error.exception.toString() + ")");
 
                 } else if (message instanceof ServerError) {
 
                     ServerError error = (ServerError) message;
                     failConnection(IWebSocketConnectionHandler.CLOSE_SERVER_ERROR,
-                            "Server error " + error.mStatusMessage);
+                            "Server error " + error.statusMessage);
 
                 } else {
 
@@ -727,7 +727,7 @@ public class WebSocketConnection implements IWebSocket {
                     mBufferedOutputStream.flush();
                     if (message instanceof Close) {
                         Close msg = (Close) message;
-                        if (msg.mIsReply) {
+                        if (msg.isReply) {
                             mMessenger.notify(message);
                         }
                     }
